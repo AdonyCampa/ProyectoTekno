@@ -1,0 +1,9 @@
+PORT=4000
+BD_CNN=mongodb+srv://MEAN_USER:TaYkuMM69RGYLeUS@micluster.qi21x.mongodb.net/miBaseDatos
+SECRET_JWT_SEED=EstOdeb3DeSERCompLic4d02080
+PUBLIC_URL=http://localhost:4000
+
+DB_HOST = localhost
+DB_USER = root
+DB_PASSWORD = '03111997'
+DB_DATABASE = teknoBD

@@ -1,0 +1,213 @@
+<div class="w-full h-full flex flex-col">
+  <div class="px-gutter pt-6 pb-20 bg-primary flex-none">
+    <div class="flex items-center justify-between">
+      <h2
+        class="headline text-primary-contrast m-0 flex items-center w-full max-w-xxxl mr-6"
+      >
+        <ic-icon @scaleIn [icIcon]="icPurcharse"></ic-icon>
+        <span @fadeInRight class="ml-4 block">Nueva Compra de Productos</span>
+      </h2>
+      <button mat-button (click)="back()" class="text-am-base-background">
+        REGRESAR
+      </button>
+    </div>
+  </div>
+  <div class="-mt-14 p-6 pt-0 overflow-hidden flex flex-col md:flex-row gap-2">
+    <form class="w-full md:w-6/12" [formGroup]="form">
+      <div class="bg-white rounded-lg p-4 shadow">
+        <div class="flex items-center">
+          <div
+            @fadeInRight
+            class="text-lg font-medium text-am-main-blue-dark ml-2"
+          >
+            Nueva Compra
+          </div>
+        </div>
+        <br />
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <app-select-autocomplete
+            label="Proveedores"
+            [control]="form.get('providerId')"
+            [required]="true"
+            [listOptions]="providerSelect"
+            [readonly]="viewDetailRead"
+          ></app-select-autocomplete>
+
+          <app-select-autocomplete
+            label="Almacenes"
+            [control]="form.get('warehouseId')"
+            [required]="true"
+            [listOptions]="warehouseSelect"
+            [readonly]="viewDetailRead"
+          ></app-select-autocomplete>
+        </div>
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Observación</mat-label>
+          <textarea
+            matInput
+            placeholder="Ingrese una Observación ..."
+            formControlName="observation"
+            [readonly]="viewDetailRead"
+          ></textarea>
+        </mat-form-field>
+
+        <div class="flex justify-between" *ngIf="!viewDetailRead">
+          <div
+            @fadeInRight
+            class="text-lg font-medium text-am-main-blue-dark ml-2"
+          >
+            Productos
+          </div>
+          <app-search-box-multiple
+            [searchOptions]="componentPurcharseDetail.searchOptionsProducts"
+            (search)="search($event)"
+            [currentValue]="componentPurcharseDetail.filters.textFilter"
+          >
+          </app-search-box-multiple>
+        </div>
+        <br />
+        <div
+          class="card h-full overflow-hidden flex-auto"
+          *ngIf="!viewDetailRead"
+        >
+          <app-list-table
+            class="w-full border rounded-lg"
+            (rowClick)="rowClick($event)"
+            [service]="_purcharseDetailService"
+            [columns]="componentPurcharseDetail.tableColumnsProducts"
+            [numRecords]="numRecordsProducts"
+            [sortBy]="componentPurcharseDetail.initialSort"
+            [sortDir]="componentPurcharseDetail.initialSortDir"
+            [getInputs]="componentPurcharseDetail.getInputs"
+          ></app-list-table>
+        </div>
+      </div>
+    </form>
+
+    <div class="w-full md:w-6/12">
+      <div class="bg-white rounded-lg p-4 shadow">
+        <div class="flex items-center">
+          <div
+            @fadeInRight
+            class="text-lg font-medium text-am-main-blue-dark ml-2"
+          >
+            Orden Compra
+          </div>
+        </div>
+        <br />
+        <div class="w-full overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead>
+              <tr>
+                <th
+                  class="px-6 py-3 bg-am-main-blue-light rounded-l-lg text-left text-xss leading-4 font-bold text-am-main-blue-dark tracking-wider"
+                ></th>
+                <th
+                  class="px-6 py-3 bg-am-main-blue-light text-left text-xss leading-4 font-bold text-am-main-blue-dark tracking-wider"
+                >
+                  CÓDIGO
+                </th>
+                <th
+                  class="px-6 py-3 bg-am-main-blue-light text-left text-xss leading-4 font-bold text-am-main-blue-dark tracking-wider"
+                >
+                  NOMBRE
+                </th>
+                <th
+                  class="px-6 py-3 bg-am-main-blue-light text-left text-xss leading-4 font-bold text-am-main-blue-dark tracking-wider"
+                >
+                  CANTIDAD
+                </th>
+                <th
+                  class="px-6 py-3 bg-am-main-blue-light text-left text-xss leading-4 font-bold text-am-main-blue-dark tracking-wider"
+                >
+                  PRECIO U.
+                </th>
+                <th
+                  class="px-6 py-3 bg-am-main-blue-light text-left text-xss leading-4 font-bold text-am-main-blue-dark tracking-wider"
+                >
+                  TOTAL
+                </th>
+                <th class="px-6 py-3 bg-am-main-blue-light rounded-r-lg"></th>
+              </tr>
+            </thead>
+            <tbody class="bg-white">
+              <tr *ngFor="let product of cartDetails">
+                <td class="px-6 py-4">
+                  <img
+                    [src]="product.image"
+                    alt="{{ product.name }}"
+                    class="avatar h-15 w-15 my-2"
+                  />
+                </td>
+                <td class="px-6 py-4 font-semibold text-xs text-left">
+                  {{ product.code }}
+                </td>
+                <td class="px-6 py-4 font-semibold text-xs text-left">
+                  {{ product.name }}
+                </td>
+                <td class="px-6 py-4 font-semibold text-xs text-left">
+                  {{ product.quantity }}
+                </td>
+                <td class="px-6 py-4 font-semibold text-xs text-left">
+                  {{ product.unitPurcharsePrice | currency : "" : "" }}
+                </td>
+                <td class="px-6 py-4 font-semibold text-xs text-left">
+                  {{ product.totalAmount | currency : "" : "" }}
+                </td>
+                <td class="px-6 py-4" *ngIf="!viewDetailRead">
+                  <div
+                    class="flex justify-center items-center cursor-pointer p-1.5 w-fit rounded-full text-am-new-red-dark bg-am-new-red-light border-am-new-red-dark mb-1"
+                  >
+                    <mat-icon
+                      [icIcon]="icRemove"
+                      matTooltip="Quitar producto del detalle"
+                      (click)="removeFromCart(product)"
+                    ></mat-icon>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+            <br />
+            <br />
+            <tfoot>
+              <tr>
+                <td colspan="4"></td>
+                <td class="font-semibold px-6 py-3 text-right">Subtotal:</td>
+                <td class="font-semibold px-6 py-3">
+                  {{ subtotal | currency : "" : "" }}
+                </td>
+              </tr>
+              <tr>
+                <td colspan="4"></td>
+                <td class="font-semibold px-6 py-3 text-right">IGV:</td>
+                <td class="font-semibold px-6 py-3">
+                  {{ igv | currency : "" : "" }}
+                </td>
+              </tr>
+              <tr>
+                <td colspan="4"></td>
+                <td class="font-semibold px-6 py-3 text-right">Monto Total:</td>
+                <td class="font-semibold px-6 py-3">
+                  {{ total | currency : "" : "" }}
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+          <hr />
+          <br />
+          <div class="flex justify-end">
+            <button
+              class="bg-accent text-accent-contrast"
+              mat-button
+              [disabled]="form.invalid || cartDetails.length == 0"
+              (click)="purcharseSave()"
+              *ngIf="!viewDetailRead"
+            >
+              GUARDAR
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
