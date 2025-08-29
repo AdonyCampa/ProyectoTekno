@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { getRol, createRol, deleteRol, updateRol } = require('../controllers/roles');
+const { getRol, createRol, deleteRol, updateRol, getRoles } = require('../controllers/roles');
 const { validarRol } = require('../validators/roles');
 
 
@@ -10,7 +10,7 @@ const router = Router();
 router.post('/new', validarRol, createRol);
 
 // Listar roles creados
-router.get('/', getRol);
+router.get('/', getRoles);
 
 // Ver Rol seleccionado
 router.get('/:id', getRol);
@@ -19,7 +19,7 @@ router.get('/:id', getRol);
 router.delete('/eliminar/:id', deleteRol);
 
 // Editar Rol seleccionado
-router.put('/editar/:id', updateRol);
+router.put('/editar/:id', validarRol, updateRol);
 
 
 module.exports = router;  
