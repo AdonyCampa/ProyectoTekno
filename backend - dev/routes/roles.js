@@ -1,16 +1,16 @@
 const { Router } = require('express');
 const { getRol, createRol, deleteRol, updateRol } = require('../controllers/roles');
+const { validarRol } = require('../validators/roles');
 
 
 
 const router = Router();
 
+// Crear un nuevo rol
+router.post('/new', validarRol, createRol);
 
 // Listar roles creados
 router.get('/', getRol);
-
-// Crear un nuevo rol
-router.post('/new', createRol);
 
 // Ver Rol seleccionado
 router.get('/:id', getRol);

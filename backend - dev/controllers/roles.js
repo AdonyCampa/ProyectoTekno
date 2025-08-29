@@ -1,6 +1,6 @@
 const { response } = require('express');
+const Rol = require('../models/roles');
 
-const { encrypt, compare } = require('../helpers/handleJwt');
 const { handleHttpError, handleErrorResponse } = require('../helpers/handleError');
 const { matchedData } = require('express-validator');
 
@@ -41,40 +41,30 @@ const getRoles = async (req, res = response) => {
 
 // Agregar un rol nuevo
 const createRol = async (req, res = response) => {
-    console.log("Agregar nuevo rol");
+    try {
+        // Limpiar los datos
+        const body = matchedData(req);
+        // Verificar la existencia del rol
+        const checkIsExist = await Rol.findOne({ where: { rol: body.rol } });
+        if (checkIsExist) {
+            handleErrorResponse(res, "Rol Existente", 401);
+            return;
+        }
+        // Crear nuevo rol
+        const rol = await Rol.create(body);
+        const data = {
+            ok: true,
+            msg: 'Rol creado exitosamente',
+            rol
+        };
+        // Generar respuesta exitosa
+        res.send(data);
 
-    /*     try {
-            const { repeatpassword } = req.body;
-            
-            // Limpiar los datos
-            const body = matchedData(req);
-            // Verificar la existencia del usuario
-            const checkIsExist = await Usuario.findOne({ where : {usuario: body.usuario} });
-            if (checkIsExist) {
-                handleErrorResponse(res, "USER_EXISTS", 401);
-                return;
-            }
-            // Verificar que las contraseñas coincidan
-            if(!(body.password === repeatpassword)){
-                handleErrorResponse(res, "PASWORD_DOES_NOT_MATCH", 400);
-                return;
-            }
-            // Obtener los datos
-            const password = await encrypt(body.password);
-            // Hashear la contraseña
-            const bodyInsert = { ...body, password };
-            // Crear usuario de DB
-            const usuario = await Usuario.create(bodyInsert);
-            const data = {
-                ok: true,
-                msg: 'Usuario creado exitosamente',
-                usuario
-            };
-            // Generar respuesta exitosa
-            res.send(data);   
-        } catch (error) {
-            handleHttpError(res, "ERROR CREATE USUARIO")
-        } */
+    } catch (error) {
+        // Error al crear el rol
+        handleHttpError(res, "Error al crear el Rol!")
+    }
+
 }
 
 // Editar rol seleccionado
