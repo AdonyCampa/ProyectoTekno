@@ -11,6 +11,9 @@ const Usuario = sequelize.define(
         nombres: {
             type: DataTypes.STRING,
         },
+        apellidos: {
+            type: DataTypes.STRING,
+        },
         password: {
             type: DataTypes.STRING,
         },
@@ -21,6 +24,15 @@ const Usuario = sequelize.define(
             type: DataTypes.STRING,
         },
         rol: {
+            type: DataTypes.INTEGER,
+        },
+        correo: {
+            type: DataTypes.STRING,
+        },
+        direccion: {
+            type: DataTypes.STRING,
+        },
+        dpi: {
             type: DataTypes.STRING,
         }
     },
