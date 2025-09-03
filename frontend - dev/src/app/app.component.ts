@@ -73,8 +73,8 @@ export class AppComponent {
     this.navigationService.items = [
       {
         type: "link",
-        label: "Estadísticas",
-        route: "estadisticas",
+        label: "Inicio",
+        route: "inicio",
         icon: IconsService.prototype.getIcon("icDashboard"),
       },
       {

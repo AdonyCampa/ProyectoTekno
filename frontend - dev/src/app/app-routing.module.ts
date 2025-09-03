@@ -7,7 +7,7 @@ import { AuthGuard } from "@shared/guards/auth.guard";
 
 const childrenRoutes: VexRoutes = [
   {
-    path: "estadisticas",
+    path: "inicio",
     loadChildren: () =>
       import("./pages/dashboard/dashboard.module").then(
         (m) => m.DashboardModule
@@ -67,7 +67,7 @@ const childrenRoutes: VexRoutes = [
 const routes: VexRoutes = [
   {
     path: "",
-    redirectTo: "estadisticas",
+    redirectTo: "inicio",
     pathMatch: "full",
   },
   {
@@ -82,7 +82,6 @@ const routes: VexRoutes = [
     path: "",
     component: CustomLayoutComponent,
     children: childrenRoutes,
-    canActivate: [AuthGuard],
   },
 ];
 
@@ -97,4 +96,4 @@ const routes: VexRoutes = [
   ],
   exports: [RouterModule],
 })
-export class AppRoutingModule {}
+export class AppRoutingModule { }

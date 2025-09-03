@@ -21,8 +21,8 @@ export class LoginComponent implements OnInit {
 
   initForm(): void {
     this.form = this.fb.group({
-      email: ["cajero@gmail.com", [Validators.required]],
-      password: ["cajero123", [Validators.required]],
+      email: ["admin", [Validators.required]],
+      password: ["admin123", [Validators.required]],
     });
   }
 
@@ -31,7 +31,7 @@ export class LoginComponent implements OnInit {
     private authService: AuthService,
     private router: Router,
     private cd: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.initForm();
