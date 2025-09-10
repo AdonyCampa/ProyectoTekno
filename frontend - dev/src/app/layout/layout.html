@@ -1,0 +1,16 @@
+<h1>Layout</h1>
+<hr>
+<p>
+	Esta pagina solo funciona si estas autenticado
+</p>
+
+<h4>
+	User info
+</h4>
+
+<pre>{{ usuario | json }}</pre>
+  
+<button (click)="logout()"> Logout </button>
+
+
+<router-outlet></router-outlet>
