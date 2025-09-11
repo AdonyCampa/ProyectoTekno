@@ -20,7 +20,7 @@
         
        <div class="col-md-6 right-box">
           <div class="row align-items-center">
-            <form [formGroup]="form"
+            <form [formGroup]="loginForm"
                    (ngSubmit)="login()">
                 <div class="header-text mb-4">
                      <h2>Hola de nuevo</h2>
@@ -49,7 +49,7 @@
                 <div class="input-group mb-3">
                     <button class="btn btn-lg btn-primary w-100 fs-6"
                             type="submit"
-                            [disabled]="form.invalid">
+                            [disabled]="loginForm.invalid">
                             Ingresar</button>
                 </div>
             </form>

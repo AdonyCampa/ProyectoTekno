@@ -15,7 +15,6 @@ export class Sidebar {
 
   logout() {
     this.router.navigateByUrl('/login');
-    this.authService.logout();
   }
 
   navInicio() {

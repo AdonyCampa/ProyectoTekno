@@ -1,9 +1,10 @@
 export interface Usuario {
-    id?: number,
-    usuario?: string,
-    nombres?: string,
-    password?: string,
-    rol?: string,
+    id: number,
+    usuario: string,
+    nombres: string,
+    apelidos: string,
+    password: string,
+    rol: string,
     imagen?: string,
     estado?: boolean,
     newpassword?: string,
@@ -13,12 +14,8 @@ export interface Usuario {
 export interface AuthResponse {
     ok?: boolean,
     msg?: string,
-    id?: number,
-    usuario?: string,
-    nombres?: string,
-    rol?: string,
-    estado?: boolean,
-    token?: string
+    user: Usuario,
+    token: string
 }
 
 export interface UsuarioResponse {

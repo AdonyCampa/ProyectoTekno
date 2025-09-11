@@ -10,11 +10,14 @@ import { Marcas } from './pages/marcas/marcas';
 import { Roles } from './pages/roles/roles';
 import { Usuarios } from './pages/usuarios/usuarios';
 import { Compras } from './pages/compras/compras';
+import { authenticatedGuard } from './guards/authenticated-guard';
+import { authGuard } from './guards/auth-guard';
 
 export const routes: Routes = [
     {
         path: 'inicio',
         component: Layout,
+        canActivate: [authGuard],
         children: [
             { path: '', component: Inicio },
             { path: 'ventas', component: Ventas },
@@ -30,7 +33,8 @@ export const routes: Routes = [
     },
     {
         path: 'login',
-        component: Auth
+        component: Auth,
+        canMatch: [authenticatedGuard]
     },
     { path: '**', redirectTo: '/login' }
 ];

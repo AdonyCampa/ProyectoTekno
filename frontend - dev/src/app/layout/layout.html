@@ -7,10 +7,9 @@
 <h4>
 	User info
 </h4>
-
-<pre>{{ usuario | json }}</pre>
+<h1>{{ authService.user()?.nombres}}</h1>
   
-<button (click)="logout()"> Logout </button>
+<button routerLink="/login" (click)="authService.logout()"> Logout </button>
 
 
 <router-outlet></router-outlet>
