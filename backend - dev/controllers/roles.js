@@ -134,13 +134,13 @@ const deleteRol = async (req, res = response) => {
         // Generar respuesta exitosa
         const data = {
             ok: true,
-            msg: 'Usuario eliminado exitosamente',
+            msg: 'Rol eliminado exitosamente',
             rol
         }
         res.send(data);
 
     } catch (error) {
-        handleHttpError(res, "Error al eliminar ro");
+        handleHttpError(res, "Error al eliminar rol");
     }
 }
 
