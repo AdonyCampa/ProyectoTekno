@@ -1,6 +1,14 @@
-<h1>Layout</h1>
-<hr>
-<p>
+<div class="app-wrapper">
+  <app-topbar style="display: contents"></app-topbar>
+  <app-sidebar style="display: contents"></app-sidebar>
+  <main class="app-main">
+    <div class="app-content"></div>
+    <router-outlet></router-outlet>
+  </main>
+
+  <app-footer style="display: contents"></app-footer>
+</div>
+<!-- <p>
 	Esta pagina solo funciona si estas autenticado
 </p>
 
@@ -8,8 +16,5 @@
 	User info
 </h4>
 <h1>{{ authService.user()?.nombres}}</h1>
-  
-<button routerLink="/login" (click)="authService.logout()"> Logout </button>
 
-
-<router-outlet></router-outlet>
+<button routerLink="/login" (click)="authService.logout()"> Logout </button> -->

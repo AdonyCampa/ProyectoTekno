@@ -4,8 +4,11 @@ import { Component } from '@angular/core';
   selector: 'app-topbar',
   imports: [],
   templateUrl: './topbar.html',
-  styleUrls: ['./topbar.scss']
+  styleUrls: ['./topbar.scss'],
 })
 export class Topbar {
-
+  toggleSidebar() {
+    document.body.classList.toggle('sidebar-collapse');
+    document.body.classList.toggle('sidebar-open');
+  }
 }

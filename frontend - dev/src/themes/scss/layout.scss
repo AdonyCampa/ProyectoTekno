@@ -1,0 +1,20 @@
+/* body.fixed-header .app-header {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 999;
+}
+ */
+
+/* body.fixed-footer .app-footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  z-index: 999;
+}
+ */
+
+[data-overlayscrollbars~='host'],
+[data-overlyscrollbars-padding] {
+  width: 100% !important;
+}

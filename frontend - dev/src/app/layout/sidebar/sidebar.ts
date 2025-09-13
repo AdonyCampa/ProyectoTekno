@@ -1,39 +1,22 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, signal } from '@angular/core';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { OverlayscrollbarsModule } from 'overlayscrollbars-ngx';
+import { MenuItem } from '../../interfaces/menu-items';
+import { MENU_ITEMS } from '../../constants/menu.constants';
+import { NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-sidebar',
-  imports: [],
+  imports: [OverlayscrollbarsModule, RouterLinkActive, RouterLink, NgClass],
   templateUrl: './sidebar.html',
-  styleUrls: ['./sidebar.scss']
+  styleUrls: ['./sidebar.scss'],
 })
 export class Sidebar {
+  menuItems = signal<MenuItem[]>(MENU_ITEMS);
+  activeMenu = signal<string | null>(null);
 
-  constructor(private router: Router,
-    private authService: AuthService) { }
-
-  logout() {
-    this.router.navigateByUrl('/login');
+  toggleMenu(label: string | undefined) {
+    this.activeMenu.set(this.activeMenu() === label ? null : label ?? '');
   }
-
-  navInicio() {
-    this.router.navigateByUrl('/inicio');
-  }
-  navVentas() {
-    this.router.navigateByUrl('/inicio/ventas');
-  }
-  navCaja() {
-    this.router.navigateByUrl('/inicio/caja');
-  }
-  navInventario() {
-    this.router.navigateByUrl('/inicio/inventario');
-  }
-  navCompras() {
-    this.router.navigateByUrl('/inicio/compras');
-  }
-  navUsuarios() {
-    this.router.navigateByUrl('/inicio/usuarios');
-  }
-
 }

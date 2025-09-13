@@ -14,27 +14,26 @@ import { authenticatedGuard } from './guards/authenticated-guard';
 import { authGuard } from './guards/auth-guard';
 
 export const routes: Routes = [
-    {
-        path: 'inicio',
-        component: Layout,
-        canActivate: [authGuard],
-        children: [
-            { path: '', component: Inicio },
-            { path: 'ventas', component: Ventas },
-            { path: 'caja', component: Caja },
-            { path: 'compras', component: Compras },
-            { path: 'categorias', component: Categorias },
-            { path: 'inventario', component: Inventario },
-            { path: 'marcas', component: Marcas },
-            { path: 'roles', component: Roles },
-            { path: 'usuarios', component: Usuarios }
-
-        ]
-    },
-    {
-        path: 'login',
-        component: Auth,
-        canMatch: [authenticatedGuard]
-    },
-    { path: '**', redirectTo: '/login' }
+  {
+    path: 'inicio',
+    component: Layout,
+    //canActivate: [authGuard],
+    children: [
+      { path: '', component: Inicio },
+      { path: 'ventas', component: Ventas },
+      { path: 'caja', component: Caja },
+      { path: 'compras', component: Compras },
+      { path: 'categorias', component: Categorias },
+      { path: 'inventario', component: Inventario },
+      { path: 'marcas', component: Marcas },
+      { path: 'roles', component: Roles },
+      { path: 'usuarios', component: Usuarios },
+    ],
+  },
+  {
+    path: 'login',
+    component: Auth,
+    //canMatch: [authenticatedGuard]
+  },
+  { path: '**', redirectTo: '/login' },
 ];
