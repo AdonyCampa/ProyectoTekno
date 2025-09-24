@@ -1,6 +1,10 @@
 import { MenuItem } from '../interfaces/menu-items';
 export const MENU_ITEMS: MenuItem[] = [
   {
+    label: 'MODULOS PRINCIPALES',
+    isHeader: true,
+  },
+  {
     label: 'Inicio',
     icon: 'bi bi-house-door-fill',
     route: '/inicio',
@@ -21,24 +25,22 @@ export const MENU_ITEMS: MenuItem[] = [
     route: '/inicio/compras',
   },
   {
-    label: 'Configuraciones',
-    icon: 'bi bi-gear',
+    label: 'CONFIGURACIONES',
+    isHeader: true,
+  },
+  {
+    label: 'Autenticación',
+    icon: 'bi bi-person-fill-gear',
     submenu: [
       {
-        label: 'Autenticación',
-        icon: 'bi bi-person-fill-gear',
-        submenu: [
-          {
-            label: 'Usuarios',
-            icon: 'bi bi-people-fill',
-            route: '/inicio/usuarios',
-          },
-          {
-            label: 'Roles',
-            icon: 'bi bi-person-fill-lock',
-            route: '/inicio/roles',
-          },
-        ],
+        label: 'Usuarios',
+        icon: 'bi bi-people-fill',
+        route: '/inicio/usuarios',
+      },
+      {
+        label: 'Roles',
+        icon: 'bi bi-person-fill-lock',
+        route: '/inicio/roles',
       },
     ],
   },

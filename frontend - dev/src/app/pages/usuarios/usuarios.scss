@@ -1,0 +1,10 @@
+table.dataTable {
+  table-layout: fixed;
+  width: 100% !important;
+}
+
+table.dataTable th,
+table.dataTable td {
+  /*   text-align: center;  */ /* opcional */
+  white-space: nowrap; /* evita que el texto se rompa en varias líneas */
+}

@@ -2,79 +2,77 @@
 <aside class="app-sidebar bg-black shadow" data-bs-theme="dark">
   <!--begin::Sidebar Brand-->
   <div class="sidebar-brand">
-    <!--begin::Brand Link-->
-    <a class="brand-link" href="/">
-      <!--begin::Brand Image-->
+    <a class="brand-link">
       <img
-        src="../assets/img/AdminLTELogo.png"
-        alt="AdminLTE Logo"
+        src="/assets/images/robot-nav.png"
+        alt="SysTekno"
         class="brand-image opacity-75 shadow"
       />
-      <!--end::Brand Image-->
-      <!--begin::Brand Text-->
-      <span class="brand-text fw-light">SysTekno</span>
-      <!--end::Brand Text-->
+      <span class="brand-text fw-dark" style="font-size: xx-large">SysTekno</span>
     </a>
-    <!--end::Brand Link-->
   </div>
   <!--end::Sidebar Brand-->
+
   <!--begin::Sidebar Wrapper-->
   <div class="sidebar-wrapper" data-overlayscrollbars="host">
     <div
-      data-overlayscrollbars-viewport="
-    scrollbarHidden
-    overflowXHidden
-    overflowYScroll"
+      data-overlayscrollbars-viewport="scrollbarHidden overflowXHidden overflowYScroll"
       overlay-scrollbars
       [options]="{ scrollbars: { autoHide: 'scroll' } }"
       [defer]="true"
     >
       <nav class="mt-2">
-        <!--begin::Sidebar Menu-->
-
         <ul
           class="nav sidebar-menu flex-column"
           data-lte-toggle="treeview"
-          aria-label="Main navigation"
-          role="navigation"
+          role="menu"
           data-accordion="false"
-          id="navigation"
         >
-          @for (item of menuItems(); track $index) { @if(item?.isHeader){
-          <li class="nav-header">{{ item?.label }}</li>
-          }@else { @let isActive = activeMenu() === item?.label;
+          @for (item of menuItems(); track $index) { @if (item.isHeader) {
+          <li class="nav-header">{{ item.label }}</li>
+          } @if (!item.isHeader && item.submenu) { @let isActive = activeMenu() === item.label;
+
           <li class="nav-item" [ngClass]="{ 'menu-open': isActive }">
-            @if(!item?.submenu){
-            <a class="nav-link" routerLinkActive="active" [routerLink]="[item?.route]">
-              <i class="nav-ico" [ngClass]="item?.icon"></i>
+            <a (click)="toggleMenu(item.label)" class="nav-link" style="cursor: pointer">
+              <i class="nav-icon" [ngClass]="item.icon"></i>
               <p>
-                {{ item?.label }}
-              </p>
-            </a>
-            }@else {
-            <a class="nav-link" (click)="toggleMenu(item?.label)">
-              <i class="nav-ico" [ngClass]="item?.icon"></i>
-              <p>
-                {{ item?.label }}
+                {{ item.label }}
                 <i class="nav-arrow bi bi-chevron-right"></i>
               </p>
             </a>
+
             @if (isActive) {
             <ul class="nav nav-treeview">
-              @for (subItem of item?.submenu; track $index) {
+              @for (sub of item.submenu; track $index) {
               <li class="nav-item">
-                <a class="nav-link" routerLinkActive="active" [routerLink]="[item?.route]">
-                  <i class="nav-icon" [ngClass]="subItem?.icon"></i>
-                  <p>{{ subItem?.label }}</p>
+                <a
+                  [routerLink]="sub.route"
+                  routerLinkActive="active"
+                  class="nav-link"
+                  [routerLinkActiveOptions]="{ exact: true }"
+                >
+                  <i class="nav-icon" [ngClass]="sub.icon"></i>
+                  <p>{{ sub.label }}</p>
                 </a>
               </li>
               }
             </ul>
-            } }
+            }
+          </li>
+          } @if (!item.isHeader && !item.submenu) {
+          <li class="nav-item">
+            <a
+              [routerLink]="item.route"
+              routerLinkActive="active"
+              class="nav-link"
+              [routerLinkActiveOptions]="{ exact: true }"
+            >
+              <i class="nav-icon" [ngClass]="item.icon"></i>
+              <p>{{ item.label }}</p>
+            </a>
           </li>
           } }
         </ul>
-        <!--end::Sidebar Menu-->
       </nav>
     </div>
   </div>

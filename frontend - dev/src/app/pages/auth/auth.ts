@@ -2,26 +2,32 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import Swal from 'sweetalert2'
+import Swal from 'sweetalert2';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-auth',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './auth.html',
-  styleUrls: ['./auth.scss']
+  styleUrls: ['./auth.scss'],
 })
 export class Auth {
   fb = inject(FormBuilder);
   hasEror = signal(false);
   isPosting = signal(false);
-  router = inject(Router)
+  router = inject(Router);
+  showPassword = false;
 
   authService = inject(AuthService);
 
   loginForm = this.fb.group({
     usuario: ['admin', [Validators.required]],
-    password: ['123456', [Validators.required, Validators.minLength(6)]]
+    password: ['123456', [Validators.required, Validators.minLength(6)]],
   });
+
+  togglePassword() {
+    this.showPassword = !this.showPassword;
+  }
 
   login() {
     if (this.loginForm.invalid) {
@@ -36,7 +42,7 @@ export class Auth {
 
     this.authService.login(usuario!, password!).subscribe((isAuthenticated) => {
       if (isAuthenticated) {
-        this.router.navigateByUrl('/inicio')
+        this.router.navigateByUrl('/inicio');
         return;
       }
 
@@ -45,8 +51,6 @@ export class Auth {
         this.hasEror.set(false);
       }, 2000);
       return;
-
-    })
-
+    });
   }
 }

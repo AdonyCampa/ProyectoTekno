@@ -7,13 +7,12 @@ import { environment } from '../../environments/environment';
 import { AuthResponse, Usuario } from '../interfaces/usuarios';
 
 type AuthStatus = 'checking' | 'authenticated' | 'not-authenticated';
-const baseUrl = environment.baseUrl
+const baseUrl = environment.baseUrl;
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
-
   private _authStatus = signal<AuthStatus>('checking');
   private _user = signal<Usuario | null>(null);
   private _token = signal<string | null>(localStorage.getItem('token'));
@@ -21,7 +20,7 @@ export class AuthService {
   private http = inject(HttpClient);
 
   chekStatusResouce = rxResource({
-    stream: () => this.checkStatus()
+    stream: () => this.checkStatus(),
   });
 
   authStatus = computed<AuthStatus>(() => {
@@ -39,7 +38,7 @@ export class AuthService {
     const body = { usuario, password };
 
     return this.http.post<AuthResponse>(url, body).pipe(
-      map(resp => this.handleAuthSuccess(resp)),
+      map((resp) => this.handleAuthSuccess(resp)),
       catchError((error: any) => this.handleAuthError(error))
     );
   }
@@ -54,7 +53,7 @@ export class AuthService {
       return of(false);
     }
     return this.http.get<AuthResponse>(url, { headers }).pipe(
-      map(resp => this.handleAuthSuccess(resp)),
+      map((resp) => this.handleAuthSuccess(resp)),
       catchError((error: any) => this.handleAuthError(error))
     );
   }
@@ -83,5 +82,4 @@ export class AuthService {
     this.logout();
     return of(false);
   }
-
 }
