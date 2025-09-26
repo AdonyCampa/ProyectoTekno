@@ -2,10 +2,12 @@ import { Component, inject, Input, OnChanges, SimpleChanges } from '@angular/cor
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RolService } from '../../../services/roles.service';
 import { Rol } from '../../../interfaces/roles';
+import Swal from 'sweetalert2';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-form-rol',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './form-rol.html',
   styleUrl: './form-rol.scss',
 })
@@ -36,25 +38,25 @@ export class FormRol implements OnChanges {
     }
   }
   save() {
-    /*     const { id, rol, descripcion } = this.rolForm.value;
+    const { id, rol, descripcion } = this.rolForm.value;
     if (this.modo === 'crear') {
       this.rolService.crearRol(rol!, descripcion!).subscribe((ok) => {
         if (ok === true) {
-          console.log('exito');
+          Swal.fire('Exito', 'Rol creado exitosamente', 'success');
         } else {
-          console.log('fracaso');
+          Swal.fire('Eror', 'Error al crear Rol', 'error');
         }
         this.rolForm.reset();
       });
     } else if (this.modo === 'editar') {
       this.rolService.editarRol(id!, rol!, descripcion!).subscribe((ok) => {
         if (ok === true) {
-          console.log('exito');
+          Swal.fire('Exito', 'Rol editado exitosamente', 'success');
         } else {
-          console.log('fracaso');
+          Swal.fire('Eror', 'Error al editar Rol', 'error');
         }
         this.rolForm.reset();
       });
-    } */
+    }
   }
 }

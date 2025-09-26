@@ -17,7 +17,7 @@ export class RolService {
 
   getRoles(): Observable<Rol[]> {
     const url = `${baseUrl}/roles`;
-    return this.http.get<Rol[]>(url).pipe(tap((resp) => console.log(resp)));
+    return this.http.get<Rol[]>(url);
   }
 
   crearRol(rol: string, descripcion: string) {
@@ -28,7 +28,6 @@ export class RolService {
       tap((resp) => {
         if (resp.ok) {
           _refresh$.next();
-          console.log(resp.msg);
         }
       }),
       map((resp) => resp.ok),
@@ -44,7 +43,6 @@ export class RolService {
       tap((resp) => {
         if (resp.ok) {
           _refresh$.next();
-          console.log(resp.msg);
         }
       }),
       map((resp) => resp.ok),
@@ -58,7 +56,6 @@ export class RolService {
       tap((resp) => {
         if (resp.ok) {
           _refresh$.next();
-          console.log(resp.msg);
         }
       }),
       map((resp) => resp.ok),

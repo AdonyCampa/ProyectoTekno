@@ -15,7 +15,7 @@
     <!--begin::End Navbar Links-->
     <ul class="navbar-nav ms-auto">
       <!--begin::Notifications Dropdown Menu-->
-      <li class="nav-item dropdown">
+      <!-- <li class="nav-item dropdown">
         <a class="nav-link" data-bs-toggle="dropdown" href="#">
           <i class="bi bi-bell-fill"></i>
           <span class="navbar-badge badge text-bg-warning">15</span>
@@ -40,18 +40,16 @@
           <div class="dropdown-divider"></div>
           <a href="#" class="dropdown-item dropdown-footer"> See All Notifications </a>
         </div>
-      </li>
+      </li> -->
       <!--end::Notifications Dropdown Menu-->
+
+      @if (userInfo.authStatus() === 'authenticated') {
 
       <!--begin::User Menu Dropdown-->
       <li class="nav-item dropdown user-menu">
         <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-          <img
-            src="/assets/images/avatar-men.png"
-            class="user-image rounded-circle shadow"
-            alt="User Image"
-          />
-          <span class="d-none d-md-inline">Alexander Pierce</span>
+          <img src="/assets/images/avatar-men.png" class="user-image rounded-circle shadow" />
+          <span class="d-none d-md-inline">{{ userInfo.user()?.nombres }}</span>
         </a>
         <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
           <!--begin::User Image-->
@@ -62,37 +60,30 @@
               alt="User Image"
             />
             <p>
-              Alexander Pierce - Web Developer
-              <small>Member since Nov. 2023</small>
+              {{ userInfo.user()?.nombres }} {{ userInfo.user()?.apellidos }}
+              <small>{{ userInfo.user()?.usuario }}</small>
             </p>
           </li>
           <!--end::User Image-->
-          <!--begin::Menu Body-->
-          <li class="user-body">
-            <!--begin::Row-->
-            <div class="row">
-              <div class="col-4 text-center">
-                <a href="#">Followers</a>
-              </div>
-              <div class="col-4 text-center">
-                <a href="#">Sales</a>
-              </div>
-              <div class="col-4 text-center">
-                <a href="#">Friends</a>
-              </div>
-            </div>
-            <!--end::Row-->
-          </li>
-          <!--end::Menu Body-->
           <!--begin::Menu Footer-->
           <li class="user-footer">
-            <a href="#" class="btn btn-default btn-flat">Profile</a>
-            <a href="#" class="btn btn-default btn-flat float-end">Sign out</a>
+            <a class="btn btn-default btn-flat">Ver Perfil</a>
+            <a
+              class="btn btn-default btn-flat float-end"
+              routerLink="/login"
+              (click)="userInfo.logout()"
+              >Cerrar Sesión</a
+            >
           </li>
           <!--end::Menu Footer-->
         </ul>
       </li>
       <!--end::User Menu Dropdown-->
+      }
+      <!--  -->
+      @else {
+      <a>...</a>
+      }
     </ul>
     <!--end::End Navbar Links-->
   </div>

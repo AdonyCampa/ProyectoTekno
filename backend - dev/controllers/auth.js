@@ -18,15 +18,15 @@ const loginUsuario = async (req, res = response) => {
       handleErrorResponse(res, "El usuario no existe", 404);
       return;
     }
-    // Verificar estado del usuario
-    if (!dbUser.estado) {
-      handleErrorResponse(res, "Usuario inactivo", 402);
-      return;
-    }
     // Confirmar si el password hace match
     const validPassword = await compare(password, dbUser.password);
     if (!validPassword) {
       handleErrorResponse(res, "Contraseña incorrecta", 402);
+      return;
+    }
+    // Verificar estado del usuario
+    if (!dbUser.estado) {
+      handleErrorResponse(res, "Usuario inactivo", 402);
       return;
     }
     // Generar el JWT

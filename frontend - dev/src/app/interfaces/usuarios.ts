@@ -5,9 +5,10 @@ export interface Usuario {
   apellidos: string;
   password: string;
   rol: number;
-  dpi?: string;
   imagen?: string;
   estado?: boolean;
+  correo?: string;
+  direccion?: string;
   newpassword?: string;
   repeatpassword?: string;
 }
@@ -15,7 +16,7 @@ export interface Usuario {
 export interface AuthResponse {
   ok?: boolean;
   msg?: string;
-  user: Usuario;
+  usuario: Usuario;
   token: string;
 }
 

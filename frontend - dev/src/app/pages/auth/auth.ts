@@ -22,7 +22,7 @@ export class Auth {
 
   loginForm = this.fb.group({
     usuario: ['admin', [Validators.required]],
-    password: ['123456', [Validators.required, Validators.minLength(6)]],
+    password: ['admin123', [Validators.required, Validators.minLength(6)]],
   });
 
   togglePassword() {
@@ -30,27 +30,17 @@ export class Auth {
   }
 
   login() {
-    if (this.loginForm.invalid) {
-      this.hasEror.set(true);
-      setTimeout(() => {
-        this.hasEror.set(false);
-      }, 2000);
-      return;
-    }
-
     const { usuario = '', password = '' } = this.loginForm.value;
 
     this.authService.login(usuario!, password!).subscribe((isAuthenticated) => {
       if (isAuthenticated) {
+        Swal.fire('Exito', 'Inicio de sesion exitoso', 'success');
         this.router.navigateByUrl('/inicio');
         return;
+      } else {
+        Swal.fire('Eror', this.authService.msg()?.msg, 'error');
+        return;
       }
-
-      this.hasEror.set(true);
-      setTimeout(() => {
-        this.hasEror.set(false);
-      }, 2000);
-      return;
     });
   }
 }

@@ -1,14 +1,26 @@
-<div class="modal-dialog">
+<div class="modal-dialog modal-dialog-centered">
   <div class="modal-content">
     <div class="modal-header">
-      <h1 class="modal-title fs-5" id="exampleModalLabel">Agregar Rol</h1>
+      <h1 class="modal-title fs-5" id="exampleModalLabel">
+        {{
+          modo === 'crear' ? 'Agregar rol' : modo === 'editar' ? 'Editar rol' : 'Detalles de rol'
+        }}
+      </h1>
       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
     </div>
     <form [formGroup]="rolForm" (ngSubmit)="save()">
       <div class="modal-body">
         <div class="mb-3">
           <label for="rol" class="form-label">Rol</label>
-          <input type="text" class="form-control" id="rol" formControlName="rol" />
+          <input
+            type="text"
+            class="form-control"
+            id="rol"
+            formControlName="rol"
+            [ngClass]="{
+              'is-invalid': rolForm.get('rol')?.touched && rolForm.get('rol')?.invalid
+            }"
+          />
         </div>
         <div class="mb-3">
           <label for="descripcion" class="form-label">Descripcion</label>
@@ -22,9 +34,11 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        @if (modo === 'crear' || modo == 'editar') {
         <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">
-          {{ modo === 'crear' ? 'Guardar' : 'Actualizar' }}
+          {{ modo === 'crear' ? 'Guardar' : 'Editar' }}
         </button>
+        }
       </div>
     </form>
   </div>

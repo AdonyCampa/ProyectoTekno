@@ -16,6 +16,7 @@ export class AuthService {
   private _authStatus = signal<AuthStatus>('checking');
   private _user = signal<Usuario | null>(null);
   private _token = signal<string | null>(localStorage.getItem('token'));
+  private _msg = signal<AuthResponse | null>(null);
 
   private http = inject(HttpClient);
 
@@ -32,6 +33,7 @@ export class AuthService {
 
   user = computed(() => this._user());
   token = computed(this._token);
+  msg = computed(this._msg);
 
   login(usuario: string, password: string): Observable<boolean> {
     const url = `${baseUrl}/auth/login`;
@@ -66,19 +68,19 @@ export class AuthService {
     localStorage.removeItem('token');
   }
 
-  private handleAuthSuccess({ token, user }: AuthResponse) {
-    this._user.set(user);
+  private handleAuthSuccess({ token, usuario }: AuthResponse) {
+    this._user.set(usuario);
     this._token.set(token);
     this._authStatus.set('authenticated');
+    this._msg.set(null);
 
     localStorage.setItem('token', token);
-
-    console.log(this._user());
 
     return true;
   }
 
   private handleAuthError(error: any) {
+    this._msg.set(error.error);
     this.logout();
     return of(false);
   }

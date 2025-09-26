@@ -6,6 +6,7 @@ const validarUsuario = [
   check("nombres").exists().notEmpty(),
   check("apellidos").exists().notEmpty(),
   check("password").exists().notEmpty(),
+  check("repeatpassword").exists().notEmpty(),
   check("estado").exists().notEmpty(),
   check("imagen").optional(),
   check("rol").exists().notEmpty(),

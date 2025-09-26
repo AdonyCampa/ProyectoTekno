@@ -1,12 +1,11 @@
-import { Component, effect, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { DataTableDirective, DataTablesModule } from 'angular-datatables';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { RolService } from '../../services/roles.service';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { Rol } from '../../interfaces/roles';
-import { DATATABLES_ES } from '../../constants/datatables-es';
 import { FormRol } from './form-rol/form-rol';
-import { Subject, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { FormsModule, ɵInternalFormsSharedModule } from '@angular/forms';
+
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-roles',
@@ -17,10 +16,17 @@ import { FormsModule, ɵInternalFormsSharedModule } from '@angular/forms';
 export class Roles implements OnInit, OnDestroy {
   rolService = inject(RolService);
   roles: Rol[] = [];
+  filteredRoles: Rol[] = []; // roles paginados después de filtro y orden
 
   page = 1; // página actual
   pageSize = 5; // filas por página
-  search = '';
+  totalRecords = 0;
+
+  // 🔹 El tipo de columna es keyof Rol
+  sortColumn: keyof Rol = 'id';
+  sortDirection: 'asc' | 'desc' = 'asc';
+
+  searchTerm: string = '';
 
   rolSeleccionado!: Rol | null;
   modoFormulario: 'crear' | 'editar' | 'ver' = 'crear';
@@ -29,8 +35,7 @@ export class Roles implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.getRoles();
-
-    this.rolService.refresh$.subscribe(() => this.getRoles());
+    this.subscription = this.rolService.refresh$.subscribe(() => this.getRoles());
   }
 
   ngOnDestroy(): void {
@@ -38,7 +43,12 @@ export class Roles implements OnInit, OnDestroy {
   }
 
   getRoles() {
-    this.rolService.getRoles().subscribe((data) => (this.roles = data));
+    this.rolService.getRoles().subscribe((data) => {
+      this.roles = data;
+      console.log(this.roles);
+
+      this.applyFilters();
+    });
   }
 
   openForm(rol: Rol | null, modo: 'crear' | 'editar' | 'ver') {
@@ -47,40 +57,84 @@ export class Roles implements OnInit, OnDestroy {
   }
 
   deleteRol(rol: Rol) {
-    if (rol.id && confirm(`¿Desea eliminar el rol "${rol.rol}"?`)) {
-      this.rolService.deleteRol(rol.id).subscribe();
-    }
+    Swal.fire({
+      title: '¿Eliminar?',
+      text: `¿Desea eliminar el rol "${rol.rol}"?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Aceptar',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.rolService.deleteRol(rol.id!).subscribe();
+        Swal.fire({
+          title: 'Eliminado!',
+          text: `Rol "${rol.rol}" fue eliminado exitosamente`,
+          icon: 'success',
+        });
+      }
+    });
   }
 
-  get filteredRoles(): Rol[] {
-    let filtered = this.roles;
+  /** Aplica búsqueda, orden y paginación */
+  applyFilters() {
+    let data = [...this.roles];
 
-    if (this.search) {
-      filtered = filtered.filter(
+    // 🔎 Filtro de búsqueda
+    if (this.searchTerm.trim() !== '') {
+      const term = this.searchTerm.toLowerCase();
+      data = data.filter(
         (r) =>
-          r.rol!.toLowerCase().includes(this.search.toLowerCase()) ||
-          r.descripcion!.toLowerCase().includes(this.search.toLowerCase())
+          r.rol!.toLowerCase().includes(term) ||
+          r.descripcion!.toLowerCase().includes(term) ||
+          r.id!.toString().includes(term)
       );
     }
 
-    const start = (this.page - 1) * this.pageSize;
-    return filtered.slice(start, start + this.pageSize);
-  }
-
-  totalPages(): number {
-    const filteredLength = this.roles.filter(
-      (r) =>
-        r.rol!.toLowerCase().includes(this.search.toLowerCase()) ||
-        r.descripcion!.toLowerCase().includes(this.search.toLowerCase())
-    ).length;
-
-    return Math.ceil(filteredLength / this.pageSize);
-  }
-
-  changePage(delta: number): void {
-    const newPage = this.page + delta;
-    if (newPage >= 1 && newPage <= this.totalPages()) {
-      this.page = newPage;
+    // ↕ Ordenamiento
+    if (this.sortColumn) {
+      data.sort((a, b) => {
+        const valueA = a[this.sortColumn];
+        const valueB = b[this.sortColumn];
+        if (valueA! < valueB!) return this.sortDirection === 'asc' ? -1 : 1;
+        if (valueA! > valueB!) return this.sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      });
     }
+
+    // 📄 Paginación
+    this.totalRecords = data.length;
+    const start = (this.page - 1) * this.pageSize;
+    const end = start + this.pageSize;
+    this.filteredRoles = data.slice(start, end);
+  }
+
+  /** Cambio de página */
+  changePage(step: number) {
+    this.page += step;
+    this.applyFilters();
+  }
+
+  /** Total de páginas */
+  totalPages(): number {
+    return Math.ceil(this.totalRecords / this.pageSize);
+  }
+
+  /** Ordenar por columna */
+  sortBy(column: keyof Rol) {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+    this.applyFilters();
+  }
+
+  /** Al escribir en el buscador */
+  onSearchChange() {
+    this.page = 1; // resetear a la primera página
+    this.applyFilters();
   }
 }

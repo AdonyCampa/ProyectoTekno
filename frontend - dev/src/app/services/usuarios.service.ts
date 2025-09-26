@@ -19,26 +19,37 @@ export class UserService {
 
   getUsuarios(): Observable<Usuario[]> {
     const url = `${baseUrl}/usuarios`;
-    return this.http.get<Usuario[]>(url).pipe(tap((resp) => console.log(resp)));
+    return this.http.get<Usuario[]>(url);
   }
 
   crearUsuario(
     nombres: string,
     apellidos: string,
-    dpi: string,
     usuario: string,
     rol: number,
+    correo: string,
+    direccion: string,
     estado: boolean,
-    password: string
+    password: string,
+    repeatpassword: string
   ) {
-    const url = `${baseUrl}/roles/new`;
-    const body = { nombres, apellidos, dpi, usuario, rol, estado, password };
+    const url = `${baseUrl}/usuarios/new`;
+    const body = {
+      nombres,
+      apellidos,
+      usuario,
+      rol,
+      correo,
+      direccion,
+      estado,
+      password,
+      repeatpassword,
+    };
 
     return this.http.post<UsuarioResponse>(url, body).pipe(
       tap((resp) => {
         if (resp.ok) {
           _refresh$.next();
-          console.log(resp.msg);
         }
       }),
       map((resp) => resp.ok),
@@ -50,20 +61,19 @@ export class UserService {
     id: number,
     nombres: string,
     apellidos: string,
-    dpi: string,
     usuario: string,
     rol: number,
-    estado: boolean,
-    password: string
+    correo: string,
+    direccion: string,
+    estado: boolean
   ) {
-    const url = `${baseUrl}/roles/editar/${id}`;
-    const body = { id, nombres, apellidos, dpi, usuario, rol, estado, password };
+    const url = `${baseUrl}/usuarios/editar/${id}`;
+    const body = { id, nombres, apellidos, usuario, rol, estado, correo, direccion };
 
     return this.http.put<UsuarioResponse>(url, body).pipe(
       tap((resp) => {
         if (resp.ok) {
           _refresh$.next();
-          console.log(resp.msg);
         }
       }),
       map((resp) => resp.ok),
@@ -72,12 +82,11 @@ export class UserService {
   }
 
   deleteUsuario(id: number) {
-    const url = `${baseUrl}/roles/eliminar/${id}`;
+    const url = `${baseUrl}/usuarios/eliminar/${id}`;
     return this.http.delete<UsuarioResponse>(url).pipe(
       tap((resp) => {
         if (resp.ok) {
           _refresh$.next();
-          console.log(resp.msg);
         }
       }),
       map((resp) => resp.ok),

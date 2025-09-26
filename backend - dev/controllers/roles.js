@@ -80,7 +80,7 @@ const updateRol = async (req, res = response) => {
     const data = {
       ok: true,
       msg: "Rol editado exitosamente",
-      body,
+      rol: body,
     };
     res.send(data);
   } catch (error) {

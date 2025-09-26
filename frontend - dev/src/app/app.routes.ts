@@ -17,7 +17,7 @@ export const routes: Routes = [
   {
     path: 'inicio',
     component: Layout,
-    //canActivate: [authGuard],
+    canActivate: [authGuard],
     children: [
       { path: '', component: Inicio },
       { path: 'ventas', component: Ventas },
@@ -33,7 +33,7 @@ export const routes: Routes = [
   {
     path: 'login',
     component: Auth,
-    //canMatch: [authenticatedGuard]
+    canMatch: [authenticatedGuard],
   },
   { path: '**', redirectTo: '/login' },
 ];
