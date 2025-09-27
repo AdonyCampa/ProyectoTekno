@@ -4,14 +4,18 @@ import { Auth } from './pages/auth/auth';
 import { Inicio } from './pages/inicio/inicio';
 import { Ventas } from './pages/ventas/ventas';
 import { Caja } from './pages/caja/caja';
-import { Categorias } from './pages/categorias/categorias';
+import { Categorias } from './pages/configuraciones/categorias/categorias';
 import { Inventario } from './pages/inventario/inventario';
-import { Marcas } from './pages/marcas/marcas';
+import { Marcas } from './pages/configuraciones/marcas/marcas';
 import { Roles } from './pages/roles/roles';
 import { Usuarios } from './pages/usuarios/usuarios';
 import { Compras } from './pages/compras/compras';
 import { authenticatedGuard } from './guards/authenticated-guard';
 import { authGuard } from './guards/auth-guard';
+import { Medidas } from './pages/configuraciones/medidas/medidas';
+import { Productos } from './pages/productos/productos';
+import { Proveedores } from './pages/proveedores/proveedores';
+import { Clientes } from './pages/clientes/clientes';
 
 export const routes: Routes = [
   {
@@ -23,11 +27,15 @@ export const routes: Routes = [
       { path: 'ventas', component: Ventas },
       { path: 'caja', component: Caja },
       { path: 'compras', component: Compras },
-      { path: 'categorias', component: Categorias },
+      { path: 'productos', component: Productos },
       { path: 'inventario', component: Inventario },
-      { path: 'marcas', component: Marcas },
-      { path: 'roles', component: Roles },
+      { path: 'proveedores', component: Proveedores },
+      { path: 'clientes', component: Clientes },
       { path: 'usuarios', component: Usuarios },
+      { path: 'roles', component: Roles },
+      { path: 'marcas', component: Marcas },
+      { path: 'categorias', component: Categorias },
+      { path: 'medidas', component: Medidas },
     ],
   },
   {

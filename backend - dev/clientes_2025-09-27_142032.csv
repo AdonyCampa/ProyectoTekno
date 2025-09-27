@@ -1,0 +1,4 @@
+id,nombres,apellidos,dpi,nit,telefono,correo,direccion,estado,createdAt,updatedAt
+1,Pedro,Bonifaz,1236451230713,114872525,55558924,test@test.com,Ciudad,1,2025-09-27 07:51:32,2025-09-27 07:51:32
+2,Juan,Pavon,3216451230713,114872525,55558924,test@test.com,Ciudad,1,2025-09-27 07:53:23,2025-09-27 07:53:23
+5,Marvin,Lopez,1452321450713,1354654,51206503,ejemplo@prueba.com,Solola,1,2025-09-27 13:29:22,2025-09-27 13:30:41

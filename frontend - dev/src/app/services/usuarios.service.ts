@@ -1,10 +1,9 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { catchError, map, tap } from 'rxjs/operators';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { Observable, of, Subject } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { AuthResponse, Usuario, UsuarioResponse } from '../interfaces/usuarios';
+import { Usuario, UsuarioResponse } from '../interfaces/usuarios';
 
 const baseUrl = environment.baseUrl;
 const _refresh$ = new Subject<void>();

@@ -1,0 +1,4 @@
+id,producto,stockmin,stockmax,medida,categoria,marca,precio_venta,precio_costo,imagen,estado,descripcion,createdAt,updatedAt
+1,Bocina estereo,2,5,1,1,1,71,56,,1,Prueba post,2025-09-27 08:23:26,2025-09-27 08:23:26
+2,Audifonos Bluetooth,2,5,2,2,2,300,257,,1,Prueba post,2025-09-27 08:24:26,2025-09-27 08:24:26
+3,Teclado Mecanico,2,5,2,2,2,300,257,,1,Prueba post,2025-09-27 08:25:02,2025-09-27 08:25:02

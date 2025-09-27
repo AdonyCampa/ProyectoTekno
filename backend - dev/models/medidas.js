@@ -1,10 +1,13 @@
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../config/mysql");
 
-const Categorias = sequelize.define(
-  "categorias",
+const Medidas = sequelize.define(
+  "medidas",
   {
-    categoria: {
+    medida: {
+      type: DataTypes.STRING,
+    },
+    abreviatura: {
       type: DataTypes.STRING,
     },
     estado: {
@@ -19,4 +22,4 @@ const Categorias = sequelize.define(
   }
 );
 
-module.exports = Categorias;
+module.exports = Medidas;

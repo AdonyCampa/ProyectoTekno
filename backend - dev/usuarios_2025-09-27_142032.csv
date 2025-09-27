@@ -1,0 +1,7 @@
+id,usuario,nombres,apellidos,password,estado,imagen,rol,correo,direccion,createdAt,updatedAt
+1,admin,Maria,Coroxon,$2a$10$zT7oSW05Y3/eV8jOjcaHOuAJzdLEPmJRjiXBbcRyuqwpNZao8Cidi,1,imagen de prueba,2,maria@vicky.com,san lucas toliman,2025-09-06 02:50:51,2025-09-26 06:38:38
+2,administrador,Abisai,Lopez,$2a$10$waWLLE/Ao0pk6Qa7t3/naO31SPLk08jBmIKuqM4/92KwYnARajTj.,0,imagen de prueba,2,campa4@gmail.com,san lucas toliman,2025-09-06 02:51:14,2025-09-26 06:36:15
+10,eliab234c,Eliab,Campa,$2a$10$IriR9oESb1p/CGa6EbOjEORDRdHqjGVpeWfqutgR6IYerRnRYxvhO,0,sin imagen,3,eliab@gmail.com,san lucas toliman,2025-09-26 05:20:10,2025-09-26 06:56:19
+11,rodri123,Rodrigo,Campa,$2a$10$lH5r.JOmnNonYHHZxyy4VuJ5cOijS.LPWW7ytXOVrDsz7Jqxtu.Ka,0,sin imagen,3,rodri@gmail.com,san lucas toliman,2025-09-26 05:28:06,2025-09-26 06:56:25
+13,maricoro,Victoria,Coroxon,$2a$10$Pa78j0Vo68rOOwsQKlkvouM3dbKcjLX0hjHlaZtMbPY/yCL0/zttW,0,sin imagen,3,maria@vicky.com,el rastro,2025-09-26 06:42:20,2025-09-26 06:42:20
+14,solmar,Marta,Solares,$2a$10$yQEQL1.MuYOv2O1VsPiqKuI3N1r6ievaBLniLt5yKJKQZH8RM8Au.,0,sin imagen,1,mar@gmail.com,san lucas toliman,2025-09-26 06:56:08,2025-09-26 06:56:08

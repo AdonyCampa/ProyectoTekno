@@ -1,8 +1,12 @@
 const { check } = require("express-validator");
 const { validateResults } = require("../middlewares/validar-campos");
 
-const validarCat = [
-  check("categoria").exists().notEmpty(),
+const validarProveedor = [
+  check("empresa").exists().notEmpty(),
+  check("contacto").exists().notEmpty(),
+  check("telefono").exists().notEmpty(),
+  check("correo").optional(),
+  check("direccion").optional(),
   check("estado").exists().notEmpty(),
   check("descripcion").optional(),
   (req, res, next) => {
@@ -10,4 +14,4 @@ const validarCat = [
   },
 ];
 
-module.exports = { validarCat };
+module.exports = { validarProveedor };

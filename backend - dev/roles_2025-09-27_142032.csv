@@ -1,0 +1,15 @@
+id,rol,descripcion,createdAt,updatedAt
+1,user,usuario simple,2025-09-06 02:42:24,2025-09-06 02:42:24
+2,admin,usuario administrador,2025-09-06 02:42:54,2025-09-06 02:42:54
+3,root,superusuario editado,2025-09-20 04:26:50,2025-09-20 13:33:55
+7,nuevo,haber que tal bien,2025-09-20 06:33:32,2025-09-26 06:52:29
+8,otra,asfasdfadf,2025-09-20 06:34:34,2025-09-20 06:34:34
+9,test@test.com,asdfasdfas,2025-09-20 06:41:29,2025-09-26 06:24:59
+10,masss,sadfasdfasdfa,2025-09-20 06:43:59,2025-09-20 06:43:59
+12,nuevom,asdfads,2025-09-20 07:11:45,2025-09-20 07:11:45
+13,prueba5,sdfasdfsdfasdf,2025-09-20 08:11:07,2025-09-20 08:11:07
+14,nueva10,asdfasdfasd,2025-09-20 08:11:32,2025-09-20 08:11:32
+15,usernew,usuario de se va eliminar,2025-09-20 13:34:41,2025-09-24 05:08:51
+16,rootnew,superusuario se va eliminar,2025-09-24 05:07:52,2025-09-24 05:07:52
+20,san lucas toliman,no se que paso,2025-09-26 04:28:31,2025-09-26 04:31:14
+21,rolfin,finmodulo,2025-09-26 06:55:12,2025-09-26 06:55:12
