@@ -86,15 +86,15 @@
           <div class="col-md-6">
             <label for="rol" class="form-label">Rol</label>
             <select
-              class="form-select"
               id="rol"
+              class="form-select"
               formControlName="rol"
               [ngClass]="{
                 'is-invalid': userForm.get('rol')?.touched && userForm.get('rol')?.invalid
               }"
               required
             >
-              <option [ngValue]="null" disabled selected>Seleccione un rol</option>
+              <option value="0" disabled selected>Seleccione un rol</option>
               @for (rol of roles; track $index) {
               <option [ngValue]="rol.id">{{ rol.rol }}</option>
               }
@@ -103,20 +103,6 @@
 
           <!-- Estado -->
           <div class="col-md-6">
-            <!--             <label for="estado" class="form-label">Estado</label>
-            <select
-              class="form-select"
-              id="estado"
-              formControlName="estado"
-              [ngClass]="{
-                'is-invalid': userForm.get('estado')?.touched && userForm.get('estado')?.invalid
-              }"
-              require
-            >
-              <option selected disabled>Seleccione un estado</option>
-              <option [ngValue]="true">Activo</option>
-              <option [ngValue]="false">Inactivo</option>
-            </select> -->
             <label for="estado" class="form-label">Estado</label>
             <div class="form-check form-switch">
               <input

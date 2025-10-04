@@ -16,6 +16,7 @@ import { Medidas } from './pages/configuraciones/medidas/medidas';
 import { Productos } from './pages/productos/productos';
 import { Proveedores } from './pages/proveedores/proveedores';
 import { Clientes } from './pages/clientes/clientes';
+import { FormCompra } from './pages/compras/form-compra/form-compra';
 
 export const routes: Routes = [
   {
@@ -27,6 +28,7 @@ export const routes: Routes = [
       { path: 'ventas', component: Ventas },
       { path: 'caja', component: Caja },
       { path: 'compras', component: Compras },
+      { path: 'compras/new', component: FormCompra },
       { path: 'productos', component: Productos },
       { path: 'inventario', component: Inventario },
       { path: 'proveedores', component: Proveedores },

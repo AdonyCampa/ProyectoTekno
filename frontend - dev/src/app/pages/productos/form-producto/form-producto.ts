@@ -4,6 +4,12 @@ import { CommonModule } from '@angular/common';
 import { ProductosService } from '../../../services/productos.service';
 import Swal from 'sweetalert2';
 import { Producto } from '../../../interfaces/productos';
+import { CategoriasService } from '../../../services/categorias.service';
+import { MarcasService } from '../../../services/marcas.service';
+import { MedidasService } from '../../../services/medidas.service';
+import { Categoria } from '../../../interfaces/categorias';
+import { Marca } from '../../../interfaces/marcas';
+import { Medida } from '../../../interfaces/medidas';
 
 @Component({
   selector: 'app-form-producto',
@@ -14,6 +20,13 @@ import { Producto } from '../../../interfaces/productos';
 export class FormProducto {
   fb = inject(FormBuilder);
   productoService = inject(ProductosService);
+  categoriaService = inject(CategoriasService);
+  marcaService = inject(MarcasService);
+  medidaService = inject(MedidasService);
+
+  categorias: Categoria[] = [];
+  marcas: Marca[] = [];
+  medidas: Medida[] = [];
 
   @Input() producto: Producto | null = null;
   @Input() modo: 'crear' | 'editar' | 'ver' = 'crear';
@@ -28,9 +41,21 @@ export class FormProducto {
     medida: [0, [Validators.required]],
     precio_venta: [0, [Validators.required]],
     precio_costo: [0, [Validators.required]],
-    descripcion: ['', [Validators.required]],
+    descripcion: [''],
     estado: [true, [Validators.required]],
   });
+
+  ngOnInit(): void {
+    this.getDatos();
+
+    console.log(this.producto);
+  }
+
+  getDatos() {
+    this.categoriaService.getCategorias().subscribe((data) => (this.categorias = data));
+    this.marcaService.getMarcas().subscribe((data) => (this.marcas = data));
+    this.medidaService.getMedidas().subscribe((data) => (this.medidas = data));
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['producto'] && this.producto) {
@@ -75,7 +100,7 @@ export class FormProducto {
         )
         .subscribe((ok) => {
           if (ok === true) {
-            Swal.fire('Exito', 'Productocreado exitosamente', 'success');
+            Swal.fire('Exito', 'Producto creado exitosamente', 'success');
           } else {
             Swal.fire('Error', 'Error al crear Producto', 'error');
           }
@@ -98,7 +123,7 @@ export class FormProducto {
         )
         .subscribe((ok) => {
           if (ok === true) {
-            Swal.fire('Exito', 'Productoeditada exitosamente', 'success');
+            Swal.fire('Exito', 'Producto editado exitosamente', 'success');
           } else {
             Swal.fire('Error', 'Error al editar Producto', 'error');
           }

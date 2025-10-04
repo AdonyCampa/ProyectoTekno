@@ -29,7 +29,7 @@ export class FormUser implements OnInit, OnChanges {
       nombres: ['', [Validators.required, Validators.minLength(3)]],
       apellidos: ['', [Validators.required]],
       usuario: ['', [Validators.required]],
-      rol: [null, [Validators.required]],
+      rol: [0, [Validators.required]],
       correo: ['', [Validators.required, Validators.email]],
       direccion: [''],
       password: ['', [Validators.required, Validators.minLength(6)]],

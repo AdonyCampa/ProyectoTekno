@@ -1,0 +1,51 @@
+<div class="card shadow-sm mb-4">
+  <div class="card-header bg-primary text-white">Registrar Movimiento</div>
+  <div class="card-body">
+    <form [formGroup]="movForm" (ngSubmit)="save()">
+      <div class="mb-3">
+        <label class="form-label">Tipo de Movimiento</label>
+        <select
+          id="asunto"
+          class="form-select"
+          formControlName="asunto"
+          [ngClass]="{
+            'is-invalid': movForm.get('asunto')?.touched && movForm.get('asunto')?.invalid
+          }"
+          required
+        >
+          <option value="true">Ingreso</option>
+          <option value="false">Egreso</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Conceptro</label>
+        <input
+          id="concepto"
+          type="text"
+          class="form-control"
+          placeholder="Ej: Pago de servicio"
+          formControlName="concepto"
+          [ngClass]="{
+            'is-invalid': movForm.get('concepto')?.touched && movForm.get('concepto')?.invalid
+          }"
+          required
+        />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Monto</label>
+        <input
+          id="monto"
+          type="number"
+          class="form-control"
+          placeholder="0.00"
+          formControlName="monto"
+          [ngClass]="{
+            'is-invalid': movForm.get('monto')?.touched && movForm.get('monto')?.invalid
+          }"
+          required
+        />
+      </div>
+      <button type="submit" class="btn btn-success w-100">Registrar</button>
+    </form>
+  </div>
+</div>

@@ -1,1 +1,212 @@
-<p>form-producto works!</p>
+<div class="modal-dialog modal-lg">
+  <div class="modal-content">
+    <form [formGroup]="productoForm" (ngSubmit)="save()">
+      <div class="modal-header">
+        <h5 class="modal-title" id="productoModalLabel">
+          {{
+            modo === 'crear'
+              ? 'Agregar Producto'
+              : modo === 'editar'
+              ? 'Editar Producto'
+              : 'Detalles de Producto'
+          }}
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Cerrar"
+        ></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="container-fluid">
+          <div class="row g-3">
+            <!-- Producto -->
+            <div class="col-md-6">
+              <label for="producto" class="form-label">Producto</label>
+              <input
+                id="producto"
+                type="text"
+                formControlName="producto"
+                class="form-control"
+                placeholder="Nombre del producto"
+                [ngClass]="{
+                  'is-invalid':
+                    productoForm.get('producto')?.touched && productoForm.get('producto')?.invalid
+                }"
+                required
+              />
+            </div>
+
+            <!-- Stock min -->
+            <div class="col-md-3">
+              <label for="stockmin" class="form-label">Stock Mínimo</label>
+              <input
+                id="stockmin"
+                type="number"
+                formControlName="stockmin"
+                class="form-control"
+                [ngClass]="{
+                  'is-invalid':
+                    productoForm.get('stockmin')?.touched && productoForm.get('stockmin')?.invalid
+                }"
+                required
+              />
+            </div>
+
+            <!-- Stock max -->
+            <div class="col-md-3">
+              <label for="stockmax" class="form-label">Stock Máximo</label>
+              <input
+                id="stockmax"
+                type="number"
+                formControlName="stockmax"
+                class="form-control"
+                [ngClass]="{
+                  'is-invalid':
+                    productoForm.get('stockmax')?.touched && productoForm.get('stockmax')?.invalid
+                }"
+                required
+              />
+            </div>
+
+            <!-- Medida -->
+            <div class="col-md-4">
+              <label for="medida" class="form-label">Medida</label>
+              <select
+                id="medida"
+                class="form-select"
+                formControlName="medida"
+                [ngClass]="{
+                  'is-invalid':
+                    productoForm.get('medida')?.touched && productoForm.get('medida')?.invalid
+                }"
+                required
+              >
+                <option [ngValue]="0" disabled selected>Seleccione una medida</option>
+                @for (m of medidas; track $index) {
+                <option [ngValue]="m.id">{{ m.medida }}-{{ m.abreviatura }}</option>
+                }
+              </select>
+            </div>
+
+            <!-- Categoría -->
+            <div class="col-md-4">
+              <label for="categoria" class="form-label">Categoría</label>
+              <select
+                id="categoria"
+                class="form-select"
+                formControlName="categoria"
+                [ngClass]="{
+                  'is-invalid':
+                    productoForm.get('categoria')?.touched && productoForm.get('categoria')?.invalid
+                }"
+                required
+              >
+                <option [ngValue]="null" disabled selected>Seleccione una categoría</option>
+                @for (c of categorias; track $index) {
+                <option [ngValue]="c.id">{{ c.categoria }}</option>
+                }
+              </select>
+            </div>
+
+            <!-- Marca -->
+            <div class="col-md-4">
+              <label for="marca" class="form-label">Marca</label>
+              <select
+                id="marca"
+                class="form-select"
+                formControlName="marca"
+                [ngClass]="{
+                  'is-invalid':
+                    productoForm.get('marca')?.touched && productoForm.get('marca')?.invalid
+                }"
+                required
+              >
+                <option [ngValue]="0" disabled selected>Seleccione una marca</option>
+                @for (m of marcas; track $index) {
+                <option [ngValue]="m.id">{{ m.marca }}</option>
+                }
+              </select>
+            </div>
+
+            <!-- Precio venta -->
+            <div class="col-md-4">
+              <label for="precio_venta" class="form-label">Precio de Venta</label>
+              <input
+                id="precio_venta"
+                type="number"
+                formControlName="precio_venta"
+                class="form-control"
+                step="0.01"
+                [ngClass]="{
+                  'is-invalid':
+                    productoForm.get('precio_venta')?.touched &&
+                    productoForm.get('precio_venta')?.invalid
+                }"
+                required
+              />
+            </div>
+
+            <!-- Precio costo -->
+            <div class="col-md-4">
+              <label for="precio_costo" class="form-label">Precio de Costo</label>
+              <input
+                id="precio_costo"
+                type="number"
+                formControlName="precio_costo"
+                class="form-control"
+                step="0.01"
+                [ngClass]="{
+                  'is-invalid':
+                    productoForm.get('precio_costo')?.touched &&
+                    productoForm.get('precio_costo')?.invalid
+                }"
+                required
+              />
+            </div>
+
+            <!-- Estado -->
+            <div class="col-md-4">
+              <label for="estado" class="form-label">Estado</label>
+              <div class="form-check form-switch">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="estado"
+                  formControlName="estado"
+                />
+                <label class="form-check-label" for="estado">
+                  {{ productoForm.get('estado')?.value ? 'Activo' : 'Inactivo' }}
+                </label>
+              </div>
+            </div>
+
+            <!-- Descripción -->
+            <div class="col-12">
+              <label class="form-label">Descripción</label>
+              <textarea formControlName="descripcion" class="form-control" rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        @if (modo === 'crear') {
+        <button
+          type="submit"
+          class="btn btn-primary"
+          data-bs-dismiss="modal"
+          [disabled]="productoForm.invalid"
+        >
+          Guardar
+        </button>
+        } @if (modo === 'editar') {
+        <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Editar</button>
+        }
+      </div>
+    </form>
+  </div>
+</div>

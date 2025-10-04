@@ -1,0 +1,30 @@
+<div class="modal-dialog modal-md">
+  <div class="modal-content">
+    <div class="modal-header bg-primary text-white">
+      <h5 class="modal-title">Cierre de Caja</h5>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+    </div>
+    <form [formGroup]="cajaForm" (ngSubmit)="save()">
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Saldo Final</label>
+          <input
+            id="monto_final"
+            type="number"
+            class="form-control"
+            placeholder="Ingrese el saldo final"
+            formControlName="monto_final"
+            [ngClass]="{
+              'is-invalid':
+                cajaForm.get('monto_final')?.touched && cajaForm.get('monto_final')?.invalid
+            }"
+          />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Cerrar Caja</button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,5 +1,191 @@
-<div class="head-title">
-				<div class="left">
-					<h1>Caja</h1>
-				</div>
-			</div>
+<div class="container-fluid mt-4">
+  <!-- ENCABEZADO -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row align-items-center">
+        <!-- INFORMACIÓN DE LA CAJA -->
+        <div class="col-md-8">
+          <h5 class="card-title mb-2">📦 Caja</h5>
+          <p class="mb-1 text-muted">
+            Estado: @if (this.caja.estado === true) {
+            <span class="badge bg-success">Abierta</span>
+            }@else {
+            <span class="badge bg-danger">Cerrada</span>
+            }
+          </p>
+          <div class="small text-muted">
+            <strong>Usuario:</strong> {{ userInfo.user()?.nombres }}
+            {{ userInfo.user()?.apellidos }} <br />
+            <strong>Última apertura:</strong> {{ this.caja.apertura }}
+          </div>
+        </div>
+
+        <!-- BOTONES DE ACCIÓN -->
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+          <button
+            class="btn btn-primary me-2"
+            data-bs-toggle="modal"
+            data-bs-target="#modalApertura"
+            (click)="openForm('apertura')"
+          >
+            <i class="bi bi-box-arrow-in-right me-1"></i> Abrir Caja
+          </button>
+          <button
+            class="btn btn-danger"
+            data-bs-toggle="modal"
+            data-bs-target="#modalCierre"
+            (click)="openForm('cierre')"
+          >
+            <i class="bi bi-box-arrow-left me-1"></i> Cerrar Caja
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- OPERACIONES -->
+    <div class="col-md-4">
+      <app-form-movimiento
+        [movimiento]="movimientoSeleccionado"
+        [caja]="caja"
+        [modo]="modoMFormulario"
+      ></app-form-movimiento>
+    </div>
+
+    <!-- HISTORIAL -->
+    <div class="col-md-8">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-secondary text-white">Movimientos de Caja</div>
+        <div class="card-body table-responsive">
+          <table class="table table-striped table-hover">
+            <thead>
+              <tr>
+                <th (click)="sortBy('id')">
+                  ID @if (sortColumn === 'id') {
+                  {{ sortDirection === 'asc' ? '▲' : '▼' }}
+                  }
+                </th>
+                <th (click)="sortBy('apertura')">
+                  Apertura @if (sortColumn === 'apertura') {
+                  {{ sortDirection === 'asc' ? '▲' : '▼' }}
+                  }
+                </th>
+                <th (click)="sortBy('asunto')">
+                  Asunto @if (sortColumn === 'asunto') {
+                  {{ sortDirection === 'asc' ? '▲' : '▼' }}
+                  }
+                </th>
+                <th (click)="sortBy('concepto')">
+                  Concepto @if (sortColumn === 'concepto') {
+                  {{ sortDirection === 'asc' ? '▲' : '▼' }}
+                  }
+                </th>
+                <th (click)="sortBy('monto')">
+                  Monto @if (sortColumn === 'monto') {
+                  {{ sortDirection === 'asc' ? '▲' : '▼' }}
+                  }
+                </th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (m of movimientos; track $index) {
+              <tr>
+                <td>{{ m.id }}</td>
+                <td>{{ m.apertura }}</td>
+                <td>{{ m.asunto }}</td>
+                <td>{{ m.concepto }}</td>
+                <td>{{ m.monto }}</td>
+                <td>{{ m.fecha }}</td>
+                <td>
+                  <div class="btn-group btn-group-sm">
+                    <a
+                      class="btn btn-info"
+                      data-bs-toggle="modal"
+                      data-bs-target="#catFormModal"
+                      (click)="openFormM(m, 'ver')"
+                      ><i class="bi bi-eye-fill"></i
+                    ></a>
+                    <a
+                      class="btn btn-warning"
+                      data-bs-toggle="modal"
+                      data-bs-target="#catFormModal"
+                      (click)="openFormM(m, 'editar')"
+                      ><i class="bi i bi-pencil-square"></i
+                    ></a>
+                    <a class="btn btn-danger" (click)="deleteMovimiento(m)"
+                      ><i class="bi bi-trash-fill"></i
+                    ></a>
+                  </div>
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL APERTURA -->
+<div class="modal fade" id="modalApertura" tabindex="-1">
+  <app-form-apertura></app-form-apertura>
+</div>
+
+<!-- MODAL CIERRE -->
+<div class="modal fade" id="modalCierre" tabindex="-1">
+  <app-form-cerrar [apertura]="caja"></app-form-cerrar>
+  <!-- <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">Cierre de Caja</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form>
+        <div class="modal-body">
+          <div class="row mb-3">
+            <div class="col-md-3">
+              <label class="form-label">Saldo Inicial</label>
+              <input type="text" class="form-control" value="Q 1,000.00" disabled />
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Total Ingresos</label>
+              <input type="text" class="form-control" value="Q 2,000.00" disabled />
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Total Egresos</label>
+              <input type="text" class="form-control" value="Q 500.00" disabled />
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Saldo Esperado</label>
+              <input type="text" class="form-control" value="Q 2,500.00" disabled />
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Saldo Real en Caja</label>
+              <input type="number" class="form-control" placeholder="Ingrese lo contado" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Diferencia</label>
+              <input type="text" class="form-control" value="Q 0.00" disabled />
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Observaciones</label>
+            <textarea class="form-control" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-danger">Confirmar Cierre</button>
+        </div>
+      </form>
+    </div>
+  </div> -->
+</div>

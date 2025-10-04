@@ -1,11 +1,10 @@
 import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-compras',
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './compras.html',
-  styleUrl: './compras.scss'
+  styleUrl: './compras.scss',
 })
-export class Compras {
-
-}
+export class Compras {}
