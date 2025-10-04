@@ -4,7 +4,7 @@ const {
   handleErrorResponse,
 } = require("../helpers/handleError");
 const { matchedData } = require("express-validator");
-const Productos = require("../models/productos");
+const { Productos, ProductosList } = require("../models/productos");
 
 // Ver Producto
 const getProducto = async (req, res = response) => {
@@ -29,7 +29,7 @@ const getProducto = async (req, res = response) => {
 const getProductos = async (req, res = response) => {
   try {
     // Obtener datos
-    const producto = await Productos.findAll();
+    const producto = await ProductosList.findAll();
 
     // Mostrar datos
     res.send(producto);
@@ -55,6 +55,8 @@ const createProducto = async (req, res = response) => {
     // Generar respuesta exitosa
     res.send(data);
   } catch (error) {
+    console.log(error);
+
     // Error al crear Producto
     handleHttpError(res, "Error al crear Producto!");
   }
@@ -86,6 +88,8 @@ const updateProducto = async (req, res = response) => {
 
     res.send(data);
   } catch (error) {
+    console.log(error);
+
     // Error al editar Producto
     handleHttpError(res, "Error al editar Producto!");
   }
