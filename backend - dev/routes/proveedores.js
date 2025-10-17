@@ -1,29 +1,51 @@
 const { Router } = require("express");
 
-const { validarProveedor } = require("../validators/proveedores");
+const {
+  validarProveedor,
+  validarProveedorUpdate,
+} = require("../validators/proveedores");
 const {
   createProveedor,
   getProveedores,
-  getProveedor,
   deleteProveedor,
   updateProveedor,
+  getProveedorById,
 } = require("../controllers/proveedores");
+
+const { validarJWT } = require("../middlewares/validar-jwt");
+const { validarPermisos } = require("../middlewares/validar-permisos");
 
 const router = Router();
 
-// Crear un nueva Proveedor
-router.post("/new", validarProveedor, createProveedor);
+router.use(validarJWT);
 
 // Listar Proveedors creadas
-router.get("/", getProveedores);
+router.get("/", validarPermisos("proveedores", "leer"), getProveedores);
 
 // Ver Proveedor seleccionada
-router.get("/:id", getProveedor);
+router.get("/:id", validarPermisos("proveedores", "leer"), getProveedorById);
 
-// Eliminar Proveedor seleccionada
-router.delete("/eliminar/:id", deleteProveedor);
+// Crear un nueva Proveedor
+router.post(
+  "/",
+  validarPermisos("proveedores", "crear"),
+  validarProveedor,
+  createProveedor
+);
 
 // Editar Proveedoregoria seleccionada
-router.put("/editar/:id", validarProveedor, updateProveedor);
+router.put(
+  "/editar/:id",
+  validarPermisos("proveedores", "actualizar"),
+  validarProveedorUpdate,
+  updateProveedor
+);
+
+// Eliminar Proveedor seleccionada
+router.delete(
+  "/:id",
+  validarPermisos("proveedores", "eliminar"),
+  deleteProveedor
+);
 
 module.exports = router;

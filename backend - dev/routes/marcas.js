@@ -1,29 +1,39 @@
 const { Router } = require("express");
 
-const { validarMarca } = require("../validators/marcas");
+const { validarMarca, validarMarcaUpdate } = require("../validators/marcas");
 const {
   createMarca,
   getMarcas,
-  getMarca,
   deleteMarca,
   updateMarca,
+  getMarcaById,
 } = require("../controllers/marcas");
+
+const { validarJWT } = require("../middlewares/validar-jwt");
+const { validarPermisos } = require("../middlewares/validar-permisos");
 
 const router = Router();
 
-// Crear un nueva marca
-router.post("/new", validarMarca, createMarca);
+router.use(validarJWT);
 
 // Listar Marcas creadas
-router.get("/", getMarcas);
+router.get("/", validarPermisos("marcas", "leer"), getMarcas);
 
 // Ver Marca seleccionada
-router.get("/:id", getMarca);
+router.get("/:id", validarPermisos("marcas", "leer"), getMarcaById);
+
+// Crear un nueva marca
+router.post("/", validarPermisos("marcas", "crear"), validarMarca, createMarca);
+
+// Editar Marca seleccionada
+router.put(
+  "/:id",
+  validarPermisos("marcas", "crear"),
+  validarMarcaUpdate,
+  updateMarca
+);
 
 // Eliminar Marca seleccionada
-router.delete("/eliminar/:id", deleteMarca);
-
-// Editar Marcaegoria seleccionada
-router.put("/editar/:id", validarMarca, updateMarca);
+router.delete("/:id", validarPermisos("marcas", "eliminar"), deleteMarca);
 
 module.exports = router;

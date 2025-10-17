@@ -1,33 +1,23 @@
 const { Router } = require("express");
-const { validarApertura, validarCierre } = require("../validators/caja");
-
-const {
-  Apertura,
-  getAperturas,
-  getApertura,
-  deleteApertura,
-  Cierre,
-  getStatus,
-} = require("../controllers/caja");
 
 const router = Router();
 
 // Aperturar caja
-router.post("/apertura", validarApertura, Apertura);
+router.post("/apertura");
 
 // Listar Aperturas
-router.get("/", getAperturas);
+router.get("/");
 
 // Estado
-router.get("/status", getStatus);
+router.get("/status");
 
 // Ver Apertura
-router.get("/:id", getApertura);
+router.get("/:id");
 
 // Eliminar Aperturaegoria seleccionada
-router.delete("/eliminar/:id", deleteApertura);
+router.delete("/eliminar/:id");
 
 // Cierre de caja
-router.put("/cierre/:id", validarCierre, Cierre);
+router.put("/cierre/:id");
 
 module.exports = router;

@@ -1,20 +1,33 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/mysql');
+const { DataTypes } = require("sequelize");
+const sequelize = require("../config/mysql");
 
-
-const Roles = sequelize.define(
-    "roles",
-    {
-        rol: {
-            type: DataTypes.STRING,
-        },
-        descripcion: {
-            type: DataTypes.STRING,
-        }
+const Rol = sequelize.define(
+  "Rol",
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
     },
-    {
-        timestamps: true,
-    }
+    nombre: {
+      type: DataTypes.STRING(50),
+      allowNull: false,
+      unique: true,
+    },
+    descripcion: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    estado: {
+      type: DataTypes.ENUM("activo", "inactivo"),
+      allowNull: false,
+      defaultValue: "activo",
+    },
+  },
+  {
+    tableName: "roles",
+    timestamps: true,
+  }
 );
 
-module.exports = Roles;
+module.exports = Rol;

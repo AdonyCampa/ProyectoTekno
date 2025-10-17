@@ -1,37 +1,63 @@
 const { DataTypes } = require("sequelize");
-const { sequelize } = require("../config/mysql");
+const sequelize = require("../config/mysql");
 
-const Clientes = sequelize.define(
-  "clientes",
+const Cliente = sequelize.define(
+  "Cliente",
   {
-    nombres: {
-      type: DataTypes.STRING,
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
     },
-    apellidos: {
-      type: DataTypes.STRING,
-    },
-    dpi: {
-      type: DataTypes.STRING,
+    nombre: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
     },
     nit: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(20),
+      allowNull: true,
+      unique: true,
     },
     telefono: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(20),
+      allowNull: true,
     },
-    correo: {
-      type: DataTypes.STRING,
+    email: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+      validate: {
+        isEmail: true,
+      },
     },
     direccion: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    tipo: {
+      type: DataTypes.ENUM("individual", "empresa"),
+      allowNull: false,
+      defaultValue: "individual",
+    },
+    limite_credito: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+      defaultValue: 0.0,
+    },
+    saldo_actual: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+      defaultValue: 0.0,
     },
     estado: {
-      type: DataTypes.BOOLEAN,
+      type: DataTypes.ENUM("activo", "inactivo"),
+      allowNull: false,
+      defaultValue: "activo",
     },
   },
   {
+    tableName: "clientes",
     timestamps: true,
   }
 );
 
-module.exports = Clientes;
+module.exports = Cliente;

@@ -1,29 +1,46 @@
 const { Router } = require("express");
 
-const { validarCompra } = require("../validators/compras");
+const { validarCompra, validarAnularCompra } = require("../validators/compras");
 const {
   registrarCompra,
   getCompras,
-  getDetalleCompra,
-  deleteCompra,
   anularCompra,
+  getEstadisticasCompras,
+  getCompraById,
 } = require("../controllers/compras");
+
+const { validarJWT } = require("../middlewares/validar-jwt");
+const { validarPermisos } = require("../middlewares/validar-permisos");
 
 const router = Router();
 
-// Registrar nueva comra
-router.post("/new", validarCompra, registrarCompra);
+router.use(validarJWT);
 
 // Listar Compras
-router.get("/", getCompras);
+router.get("/", validarPermisos("compras", "leer"), getCompras);
+router.get(
+  "/estadisticas",
+  validarPermisos("compras", "leer"),
+  getEstadisticasCompras
+);
 
 // Ver detalle de compra
-router.get("/:id", getDetalleCompra);
+router.get("/:id", validarPermisos("compras", "leer"), getCompraById);
+
+// Registrar nueva comra
+router.post(
+  "/",
+  validarPermisos("compras", "crear"),
+  validarCompra,
+  registrarCompra
+);
 
 // Eliminar compra seleccionada
-router.delete("/eliminar/:id", deleteCompra);
-
-// Cierre de caja
-router.put("/anular/:id", validarCompra, anularCompra);
+router.post(
+  "/:id/anular",
+  validarPermisos("compras", "eliminar"),
+  validarAnularCompra,
+  anularCompra
+);
 
 module.exports = router;

@@ -1,0 +1,237 @@
+// Archivo de prueba para endpoints - test-endpoints.http
+
+### Variables
+@baseUrl = http://localhost:3000/api
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+### Health Check
+GET {{baseUrl}}/../health
+
+### ========================================
+### AUTENTICACIÓN
+### ========================================
+
+### Login
+POST {{baseUrl}}/usuarios/login
+Content-Type: application/json
+
+{
+  "email": "admin@sistema.com",
+  "password": "admin123"
+}
+
+### Obtener permisos del usuario autenticado
+GET {{baseUrl}}/auth/permisos
+Authorization: Bearer {{token}}
+
+### ========================================
+### USUARIOS
+### ========================================
+
+### Listar usuarios
+GET {{baseUrl}}/usuarios?page=1&limit=10
+Authorization: Bearer {{token}}
+
+### Obtener usuario por ID
+GET {{baseUrl}}/usuarios/1
+Authorization: Bearer {{token}}
+
+### Crear usuario
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "nombre": "Usuario Prueba",
+  "email": "prueba@test.com",
+  "password": "password123",
+  "telefono": "12345678",
+  "direccion": "Dirección de prueba",
+  "rol_id": 3
+}
+
+### Actualizar usuario
+PUT {{baseUrl}}/usuarios/2
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "nombre": "Usuario Actualizado",
+  "telefono": "87654321"
+}
+
+### Cambiar contraseña
+PUT {{baseUrl}}/usuarios/2/cambiar-password
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "password_actual": "password123",
+  "password_nuevo": "nuevapassword456"
+}
+
+### Eliminar usuario (soft delete)
+DELETE {{baseUrl}}/usuarios/2
+Authorization: Bearer {{token}}
+
+### ========================================
+### ROLES
+### ========================================
+
+### Listar roles
+GET {{baseUrl}}/roles?incluir_permisos=true
+Authorization: Bearer {{token}}
+
+### Obtener rol por ID
+GET {{baseUrl}}/roles/1
+Authorization: Bearer {{token}}
+
+### Crear rol
+POST {{baseUrl}}/roles
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "nombre": "Supervisor",
+  "descripcion": "Supervisor de área"
+}
+
+### Actualizar rol
+PUT {{baseUrl}}/roles/5
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "nombre": "Supervisor General",
+  "descripcion": "Supervisor de todas las áreas"
+}
+
+### Asignar permisos a rol
+POST {{baseUrl}}/roles/3/permisos
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "permisos": [
+    {
+      "modulo_id": 1,
+      "crear": true,
+      "leer": true,
+      "actualizar": true,
+      "eliminar": false
+    },
+    {
+      "modulo_id": 2,
+      "crear": true,
+      "leer": true,
+      "actualizar": true,
+      "eliminar": false
+    }
+  ]
+}
+
+### Obtener permisos de un rol
+GET {{baseUrl}}/roles/3/permisos
+Authorization: Bearer {{token}}
+
+### Eliminar rol
+DELETE {{baseUrl}}/roles/5
+Authorization: Bearer {{token}}
+
+### ========================================
+### MÓDULOS
+### ========================================
+
+### Listar módulos
+GET {{baseUrl}}/modulos
+Authorization: Bearer {{token}}
+
+### Obtener módulo por ID
+GET {{baseUrl}}/modulos/1
+Authorization: Bearer {{token}}
+
+### Crear módulo
+POST {{baseUrl}}/modulos
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "nombre": "Reportes",
+  "slug": "reportes",
+  "descripcion": "Módulo de reportes",
+  "icono": "bi-file-bar-graph",
+  "ruta": "/reportes",
+  "orden": 13
+}
+
+### Actualizar módulo
+PUT {{baseUrl}}/modulos/13
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "nombre": "Reportes Avanzados",
+  "orden": 1
+}
+
+### Inicializar módulos del sistema
+POST {{baseUrl}}/modulos/inicializar
+Authorization: Bearer {{token}}
+
+### Eliminar módulo
+DELETE {{baseUrl}}/modulos/13
+Authorization: Bearer {{token}}
+
+### ========================================
+### CAJA
+### ========================================
+
+### Obtener caja actual
+GET {{baseUrl}}/caja/actual
+Authorization: Bearer {{token}}
+
+### Abrir caja
+POST {{baseUrl}}/caja/abrir
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "monto_inicial": 1000,
+  "observaciones": "Apertura de caja del día"
+}
+
+### Crear movimiento
+POST {{baseUrl}}/caja/movimiento
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "tipo": "ingreso",
+  "concepto": "Venta de productos",
+  "monto": 350.50,
+  "descripcion": "Venta al cliente Juan Pérez",
+  "referencia": "VENTA-001"
+}
+
+### Obtener movimientos
+GET {{baseUrl}}/caja/movimientos?page=1&limit=10
+Authorization: Bearer {{token}}
+
+### Cerrar caja
+POST {{baseUrl}}/caja/cerrar
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "caja_id": 1,
+  "monto_final": 1350.50,
+  "observaciones": "Cierre del día"
+}
+
+### Obtener historial de cajas
+GET {{baseUrl}}/caja/historial?estado=cerrada&page=1&limit=10
+Authorization: Bearer {{token}}
+
+### Obtener estadísticas
+GET {{baseUrl}}/caja/estadisticas
+Authorization: Bearer {{token}}

@@ -5,245 +5,393 @@ const {
 } = require("../helpers/handleError");
 const { matchedData } = require("express-validator");
 
-const { CajaAperturas } = require("../models/caja");
-const { Compras, ComprasDetalle } = require("../models/compras");
-const Inventarios = require("../models/inventarios");
+const {
+  Compra,
+  DetalleCompra,
+  Proveedor,
+  Producto,
+  Usuario,
+} = require("../models");
+const { Op } = require("sequelize");
+const sequelize = require("../config/mysql");
 
-// Ver Apertura
-const getDetalleCompra = async (req, res = response) => {
-  try {
-    /* const { id } = req.params;
-
-    const compra = await Compra.findOne({
-      where: { id },
-      include: [
-        {
-          model: DetalleCompra,
-          include: [
-            {
-              model: Producto,
-              attributes: ["id", "nombre", "codigo", "precio"]
-            }
-          ]
-        }
-      ]
-    });
-
-    if (!compra) {
-      return res.status(404).json({ message: "Compra no encontrada" });
-    }
-
-    res.json(compra); */
-    // Obtener datos desde el frontend
-    const { id } = req.params;
-    const apertura = await CajaAperturas.findByPk(id);
-
-    // Comprobar si existe el id ingresado
-    if (!apertura) {
-      // Mostrar mensaje de error
-      handleErrorResponse(res, "ID Apertura no existe", 404);
-      return;
-    }
-    // Generar respuesta exitosa
-    res.send(apertura);
-  } catch (error) {
-    handleHttpError(res, "Error al buscar apertura");
-  }
-};
 // Ver compras
 const getCompras = async (req, res = response) => {
   try {
-    /* const { fechaInicio, fechaFin, proveedor, search } = req.query;
+    const {
+      estado,
+      proveedor_id,
+      fecha_inicio,
+      fecha_fin,
+      page = 1,
+      limit = 10,
+    } = req.query;
+    const whereClause = {};
 
-    const where = {};
+    if (estado) whereClause.estado = estado;
+    if (proveedor_id) whereClause.proveedor_id = proveedor_id;
 
-    // 🔹 Filtro por rango de fechas
-    if (fechaInicio && fechaFin) {
-      where.fecha = {
-        [Op.between]: [new Date(fechaInicio), new Date(fechaFin)]
+    if (fecha_inicio && fecha_fin) {
+      whereClause.fecha = {
+        [Op.between]: [new Date(fecha_inicio), new Date(fecha_fin)],
       };
-    } else if (fechaInicio) {
-      where.fecha = { [Op.gte]: new Date(fechaInicio) };
-    } else if (fechaFin) {
-      where.fecha = { [Op.lte]: new Date(fechaFin) };
     }
 
-    // 🔹 Filtro por proveedor (por id)
-    if (proveedor) {
-      where.id_proveedor = proveedor;
-    }
+    const offset = (parseInt(page) - 1) * parseInt(limit);
 
-    // 🔹 Búsqueda por texto
-    const searchCondition = search
-      ? {
-          [Op.or]: [
-            { '$Proveedor.nombre$': { [Op.like]: `%${search}%` } },
-            { numero_factura: { [Op.like]: `%${search}%` } }
-          ]
-        }
-      : {};
-
-    const compras = await Compra.findAll({
-      where: { ...where, ...searchCondition },
+    const { count, rows } = await Compra.findAndCountAll({
+      where: whereClause,
       include: [
         {
           model: Proveedor,
-          attributes: ["id", "nombre"]
+          as: "proveedor",
+          attributes: ["id", "empresa", "contacto"],
+        },
+        {
+          model: Usuario,
+          as: "usuario",
+          attributes: ["id", "nombre"],
+        },
+      ],
+      order: [["fecha", "DESC"]],
+      limit: parseInt(limit),
+      offset,
+    });
+
+    const data = {
+      success: true,
+      data: {
+        compras: rows,
+        pagination: {
+          total: count,
+          page: parseInt(page),
+          limit: parseInt(limit),
+          totalPages: Math.ceil(count / parseInt(limit)),
+        },
+      },
+    };
+
+    // Mostrar datos
+    res.send(data);
+  } catch (error) {
+    console.error("Error al obtener compras:", error);
+    // Mostrar mensaje de error en la peticion
+    handleHttpError(res, "Error al obtener compras");
+  }
+};
+
+//Ver compra
+const getCompraById = async (req, res = response) => {
+  try {
+    const { id } = req.params;
+
+    const compra = await Compra.findByPk(id, {
+      include: [
+        {
+          model: Proveedor,
+          as: "proveedor",
+        },
+        {
+          model: Usuario,
+          as: "usuario",
+          attributes: ["id", "nombre"],
         },
         {
           model: DetalleCompra,
-          attributes: ["id", "cantidad", "precio_unitario", "subtotal"]
-        }
+          as: "detalles",
+          include: [
+            {
+              model: Producto,
+              as: "producto",
+              attributes: ["id", "codigo", "nombre"],
+            },
+          ],
+        },
       ],
-      order: [["fecha", "DESC"]]
     });
 
-    res.json(compras); */
+    if (!compra) {
+      handleErrorResponse(res, "Compra no encontrada", 404);
+      return;
+    }
 
-    // Obtener datos
-    const aperturas = await CajaAperturas.findAll();
+    const data = {
+      success: true,
+      data: compra,
+    };
 
     // Mostrar datos
-    res.send(aperturas);
+    res.send(data);
   } catch (error) {
+    console.error("Error al obtener compra:", error);
     // Mostrar mensaje de error en la peticion
-    handleHttpError(res, "Error al obtener aperturas");
+    handleHttpError(res, "Error al obtener compra");
   }
 };
 
 // Agregar apertura de caja
 const registrarCompra = async (req, res = response) => {
+  const transaction = await sequelize.transaction();
   try {
     // Limpiar los datos
     const body = matchedData(req);
+    const usuario_id = req.usuario.id;
 
-    // Validar que haya caja abierta
-    const cajaAbierta = await CajaAperturas.findOne({
-      where: { estado: 1 },
-    });
-    if (!cajaAbierta) {
-      handleErrorResponse(res, "No hay caja abierta", 404);
+    // Verificar proveedor
+    const proveedor = await Proveedor.findByPk(body.proveedor_id);
+    if (!proveedor) {
+      await transaction.rollback();
+      handleErrorResponse(res, "Proveedor no encontrado", 404);
       return;
     }
+    // Validar detalles
+    if (!body.detalles || body.detalles.length === 0) {
+      await transaction.rollback();
+      handleErrorResponse(
+        res,
+        "Debe incluir al menos un producto en la compra",
+        404
+      );
+      return;
+    }
+
+    // Generar número de compra
+    const ultimaCompra = await Compra.findOne({
+      order: [["id", "DESC"]],
+      attributes: ["id"],
+    });
+    const numeroCompra = `COMP-${String((ultimaCompra?.id || 0) + 1).padStart(
+      6,
+      "0"
+    )}`;
+
+    // Calcular totales
     let total = 0;
+    const detallesValidados = [];
 
-    // Calcular total de la compra
-    body.detalle.forEach((p) => {
-      total += p.cantidad * p.precio_unitario;
-    });
+    for (const detalle of body.detalles) {
+      const producto = await Producto.findByPk(detalle.producto_id);
+      if (!producto) {
+        await transaction.rollback();
+        handleErrorResponse(
+          res,
+          `Producto con ID ${detalle.producto_id} no encontrado`,
+          404
+        );
+        return;
+      }
 
-    // Crear compra
-    const compra = await Compras.create({
-      proveedor: body.proveedor,
-      usuario: body.usuario,
-      apertura: body.apertura,
-      total: total,
-    });
+      const totalDetalle =
+        parseFloat(detalle.cantidad) * parseFloat(detalle.precio_unitario);
+      total += totalDetalle;
 
-    // Crear los detalles y actualizar inventario
-    for (const p of body.detalle) {
-      const subtotal = p.cantidad * p.precio_unitario;
-
-      // Registrar detalle de compra
-      await ComprasDetalle.create({
-        compra: compra.id,
-        producto: p.producto,
-        cantidad: p.cantidad,
-        precio_unitario: p.precio_unitario,
-        subtotal,
-      });
-
-      // Movimiento de inventario (ingreso)
-      await Inventarios.create({
-        producto: p.producto,
-        tipo: 1,
-        cantidad: p.cantidad,
-        referencia: compra.id,
+      detallesValidados.push({
+        producto_id: detalle.producto_id,
+        cantidad: detalle.cantidad,
+        precio_unitario: detalle.precio_unitario,
+        total: totalDetalle,
+        producto,
       });
     }
 
+    // Crear compra
+    const compra = await Compra.create(
+      {
+        numero_compra: numeroCompra,
+        fecha: new Date(),
+        proveedor_id: body.proveedor_id,
+        total,
+        tipo_pago: body.tipo_pago || "contado",
+        estado: "completada",
+        observaciones: body.observaciones,
+        usuario_id: body.usuario_id,
+      },
+      { transaction }
+    );
+
+    // Crear detalles y actualizar inventario
+    for (const detalle of detallesValidados) {
+      await DetalleCompra.create(
+        {
+          compra_id: compra.id,
+          producto_id: detalle.producto_id,
+          cantidad: detalle.cantidad,
+          precio_unitario: detalle.precio_unitario,
+          subtotal: detalle.subtotal,
+        },
+        { transaction }
+      );
+
+      // Actualizar stock del producto
+      await detalle.producto.increment("stock_actual", {
+        by: parseInt(detalle.cantidad),
+        transaction,
+      });
+
+      // Actualizar precio de costo del producto
+      await detalle.producto.update(
+        {
+          precio_costo: detalle.precio_unitario,
+        },
+        { transaction }
+      );
+    }
+
+    await transaction.commit();
+
+    // Obtener compra creada con relaciones
+    const compraCreada = await Compra.findByPk(compra.id, {
+      include: [
+        {
+          model: Proveedor,
+          as: "proveedor",
+        },
+        {
+          model: DetalleCompra,
+          as: "detalles",
+          include: [
+            {
+              model: Producto,
+              as: "producto",
+              attributes: ["id", "codigo", "nombre"],
+            },
+          ],
+        },
+      ],
+    });
+
     const data = {
-      ok: true,
-      msg: "Apertura de caja Exitosa",
-      compra,
+      success: true,
+      message: "Compra registrada exitosamente",
+      data: compraCreada,
     };
     // Generar respuesta exitosa
     res.send(data);
   } catch (error) {
+    await transaction.rollback();
+    console.error("Error al registrar compra:", error);
     // Error al crear realizar compra
-    handleHttpError(res, "Error al realizar compra");
+    handleHttpError(res, "Error al registrar compra");
   }
 };
 
 // Anular compra
 const anularCompra = async (req, res = response) => {
+  const transaction = await sequelize.transaction();
   try {
-    // Limpiar los datos
     const { id } = req.params;
-    const body = matchedData(req);
+    const { motivo } = req.body;
 
-    // Checkear id categoria existente
-    const caja = await CajaAperturas.findByPk(id);
+    const compra = await Compra.findByPk(id, {
+      include: [
+        {
+          model: DetalleCompra,
+          as: "detalles",
+        },
+      ],
+    });
 
-    if (!caja) {
-      handleErrorResponse(res, "La apertura no existe", 404);
+    if (!compra) {
+      await transaction.rollback();
+      handleErrorResponse(res, "Compra no encontrada", 404);
       return;
     }
-    if (caja.estado === false) {
-      handleErrorResponse(res, "La caja ya esta cerrada", 404);
+
+    if (compra.estado === "cancelada") {
+      await transaction.rollback();
+      handleErrorResponse(res, "La compra ya está cancelada", 404);
       return;
     }
 
-    caja.cierre = new Date();
-    caja.monto_final = body.monto_final;
-    caja.estado = 0;
+    // Revertir inventario
+    for (const detalle of compra.detalles) {
+      const producto = await Producto.findByPk(detalle.producto_id);
 
-    await caja.save();
+      if (producto.stock_actual < detalle.cantidad) {
+        await transaction.rollback();
+        handleErrorResponse(
+          res,
+          `No hay suficiente stock del producto ${producto.nombre} para cancelar la compra`,
+          404
+        );
+        return;
+      }
+
+      await producto.decrement("stock_actual", {
+        by: parseInt(detalle.cantidad),
+        transaction,
+      });
+    }
+
+    // Actualizar estado de la compra
+    await compra.update(
+      {
+        estado: "cancelada",
+        observaciones: `${compra.observaciones || ""}\nCANCELADA: ${
+          motivo || "Sin motivo especificado"
+        }`,
+      },
+      { transaction }
+    );
+
+    await transaction.commit();
 
     // Generar respuesta exitosa
     const data = {
-      ok: true,
-      msg: "Cierre de caja Exitoso",
-      caja,
+      success: true,
+      message: "Compra cancelada exitosamente",
+      data: compra,
     };
 
     res.send(data);
   } catch (error) {
+    await transaction.rollback();
+    console.error("Error al cancelar compra:", error);
     // Error al editar categoria
-    handleHttpError(res, "Error al cerrar caja!");
+    handleHttpError(res, "Error al cancelar compra");
   }
 };
 
-// Eliminar compra
-const deleteCompra = async (req, res = response) => {
+/**
+ * Obtener estadísticas de compras
+ */
+const getEstadisticasCompras = async (req, res = response) => {
   try {
-    // Eliminar usuario seleccionado
-    const { id } = req.params;
-    // Buscar si existe el registro
-    const apertura = await CajaAperturas.findByPk(id);
-    if (!apertura) {
-      handleErrorResponse(res, "Categoria no existente", 404);
-      return;
-    }
-    // Eliminando datos
-    await apertura.destroy(apertura);
+    const { fecha_inicio, fecha_fin } = req.query;
 
-    // Generar respuesta exitosa
-    const data = {
-      ok: true,
-      msg: "Apertura eliminada exitosamente",
-      apertura,
-    };
-    res.send(data);
+    const whereClause = { estado: "completada" };
+
+    if (fecha_inicio && fecha_fin) {
+      whereClause.fecha = {
+        [Op.between]: [new Date(fecha_inicio), new Date(fecha_fin)],
+      };
+    }
+
+    const estadisticas = await Compra.findAll({
+      where: whereClause,
+      attributes: [
+        [sequelize.fn("COUNT", sequelize.col("id")), "total_compras"],
+        [sequelize.fn("SUM", sequelize.col("total")), "monto_total"],
+        [sequelize.fn("AVG", sequelize.col("total")), "promedio_compra"],
+      ],
+      raw: true,
+    });
+
+    res.status(200).json({
+      success: true,
+      data: estadisticas[0],
+    });
   } catch (error) {
-    handleHttpError(res, "Error al eliminar apertera");
+    console.error("Error al obtener estadísticas:", error);
+    // Error al editar categoria
+    handleHttpError(res, "Error al obtener estadísticas");
   }
 };
 
 module.exports = {
-  getDetalleCompra,
   getCompras,
+  getCompraById,
   registrarCompra,
   anularCompra,
-  deleteCompra,
+  getEstadisticasCompras,
 };

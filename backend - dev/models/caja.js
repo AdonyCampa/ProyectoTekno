@@ -1,55 +1,85 @@
 const { DataTypes } = require("sequelize");
-const { sequelize } = require("../config/mysql");
+const sequelize = require("../config/mysql");
 
-const CajaMovimientos = sequelize.define(
-  "caja_movimientos",
+const Caja = sequelize.define(
+  "Caja",
   {
-    apertura: {
+    id: {
       type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
     },
-    asunto: {
-      type: DataTypes.BOOLEAN,
-    },
-    concepto: {
-      type: DataTypes.STRING,
-    },
-    monto: {
-      type: DataTypes.NUMBER,
-    },
-    fecha: {
+    fecha_apertura: {
       type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
-  },
-  {
-    timestamps: true,
-  }
-);
-
-const CajaAperturas = sequelize.define(
-  "caja_aperturas",
-  {
-    usuario: {
-      type: DataTypes.INTEGER,
-    },
-    apertura: {
+    fecha_cierre: {
       type: DataTypes.DATE,
-    },
-    cierre: {
-      type: DataTypes.DATE,
+      allowNull: true,
     },
     monto_inicial: {
-      type: DataTypes.NUMBER,
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+      defaultValue: 0.0,
     },
     monto_final: {
-      type: DataTypes.NUMBER,
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: true,
+    },
+    total_ingresos: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+      defaultValue: 0.0,
+    },
+    total_egresos: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+      defaultValue: 0.0,
+    },
+    saldo_esperado: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: true,
+    },
+    diferencia: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: true,
+      defaultValue: 0.0,
     },
     estado: {
-      type: DataTypes.BOOLEAN,
+      type: DataTypes.ENUM("abierta", "cerrada"),
+      allowNull: false,
+      defaultValue: "abierta",
+    },
+    observaciones_apertura: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    observaciones_cierre: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    usuario_apertura: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "usuarios",
+        key: "id",
+      },
+    },
+    usuario_cierre: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "usuarios",
+        key: "id",
+      },
     },
   },
   {
+    tableName: "cajas",
     timestamps: true,
   }
 );
 
-module.exports = { CajaMovimientos, CajaAperturas };
+module.exports = Caja;

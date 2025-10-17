@@ -1,31 +1,52 @@
 const { DataTypes } = require("sequelize");
-const { sequelize } = require("../config/mysql");
+const sequelize = require("../config/mysql");
 
-const Proveedores = sequelize.define(
-  "proveedores",
+const Proveedor = sequelize.define(
+  "Proveedor",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
     empresa: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(100),
+      allowNull: false,
+      unique: true,
     },
     contacto: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
+    nit: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
     },
     telefono: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(20),
+      allowNull: true,
     },
-    correo: {
-      type: DataTypes.STRING,
+    email: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+      validate: {
+        isEmail: true,
+      },
     },
     direccion: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
+      allowNull: true,
     },
     estado: {
-      type: DataTypes.BOOLEAN,
+      type: DataTypes.ENUM("activo", "inactivo"),
+      allowNull: false,
+      defaultValue: "activo",
     },
   },
   {
+    tableName: "proveedores",
     timestamps: true,
   }
 );
 
-module.exports = Proveedores;
+module.exports = Proveedor;

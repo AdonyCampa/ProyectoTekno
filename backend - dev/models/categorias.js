@@ -1,22 +1,34 @@
+// models/Categoria.js
 const { DataTypes } = require("sequelize");
-const { sequelize } = require("../config/mysql");
+const sequelize = require("../config/mysql");
 
-const Categorias = sequelize.define(
-  "categorias",
+const Categoria = sequelize.define(
+  "Categoria",
   {
-    categoria: {
-      type: DataTypes.STRING,
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
     },
-    estado: {
-      type: DataTypes.BOOLEAN,
+    nombre: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+      unique: true,
     },
     descripcion: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    estado: {
+      type: DataTypes.ENUM("activo", "inactivo"),
+      allowNull: false,
+      defaultValue: "activo",
     },
   },
   {
+    tableName: "categorias",
     timestamps: true,
   }
 );
 
-module.exports = Categorias;
+module.exports = Categoria;

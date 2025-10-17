@@ -1,25 +1,38 @@
 const { DataTypes } = require("sequelize");
-const { sequelize } = require("../config/mysql");
+const sequelize = require("../config/mysql");
 
-const Medidas = sequelize.define(
-  "medidas",
+const Medida = sequelize.define(
+  "Medida",
   {
-    medida: {
-      type: DataTypes.STRING,
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    nombre: {
+      type: DataTypes.STRING(50),
+      allowNull: false,
+      unique: true,
     },
     abreviatura: {
-      type: DataTypes.STRING,
-    },
-    estado: {
-      type: DataTypes.BOOLEAN,
+      type: DataTypes.STRING(10),
+      allowNull: false,
+      unique: true,
     },
     descripcion: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    estado: {
+      type: DataTypes.ENUM("activo", "inactivo"),
+      allowNull: false,
+      defaultValue: "activo",
     },
   },
   {
+    tableName: "medidas",
     timestamps: true,
   }
 );
 
-module.exports = Medidas;
+module.exports = Medida;

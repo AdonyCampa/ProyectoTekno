@@ -1,22 +1,33 @@
 const { DataTypes } = require("sequelize");
-const { sequelize } = require("../config/mysql");
+const sequelize = require("../config/mysql");
 
-const Marcas = sequelize.define(
-  "marcas",
+const Marca = sequelize.define(
+  "Marca",
   {
-    marca: {
-      type: DataTypes.STRING,
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
     },
-    estado: {
-      type: DataTypes.BOOLEAN,
+    nombre: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+      unique: true,
     },
     descripcion: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    estado: {
+      type: DataTypes.ENUM("activo", "inactivo"),
+      allowNull: false,
+      defaultValue: "activo",
     },
   },
   {
+    tableName: "marcas",
     timestamps: true,
   }
 );
 
-module.exports = Marcas;
+module.exports = Marca;

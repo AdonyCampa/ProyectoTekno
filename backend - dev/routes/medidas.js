@@ -1,29 +1,44 @@
 const { Router } = require("express");
 
-const { validarMedida } = require("../validators/medidas");
+const { validarMedida, validarMedidaUpdate } = require("../validators/medidas");
 const {
   createMedida,
   getMedidas,
-  getMedida,
   deleteMedida,
   updateMedida,
+  getMedidaById,
 } = require("../controllers/medidas");
+
+const { validarJWT } = require("../middlewares/validar-jwt");
+const { validarPermisos } = require("../middlewares/validar-permisos");
 
 const router = Router();
 
-// Crear un nueva medida
-router.post("/new", validarMedida, createMedida);
+router.use(validarJWT);
 
 // Listar Medidas creadas
-router.get("/", getMedidas);
+router.get("/", validarPermisos("medidas", "leer"), getMedidas);
 
 // Ver Medida seleccionada
-router.get("/:id", getMedida);
+router.get("/:id", validarPermisos("medidas", "leer"), getMedidaById);
 
-// Eliminar Medida seleccionada
-router.delete("/eliminar/:id", deleteMedida);
+// Crear un nueva medida
+router.post(
+  "/",
+  validarPermisos("medidas", "crear"),
+  validarMedida,
+  createMedida
+);
 
 // Editar Medidaegoria seleccionada
-router.put("/editar/:id", validarMedida, updateMedida);
+router.put(
+  "/:id",
+  validarPermisos("medidas", "actualizar"),
+  validarMedidaUpdate,
+  updateMedida
+);
+
+// Eliminar Medida seleccionada
+router.delete("/:id", validarPermisos("medidas", "eliminar"), deleteMedida);
 
 module.exports = router;

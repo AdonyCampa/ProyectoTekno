@@ -5,36 +5,61 @@ const {
 } = require("../helpers/handleError");
 const { matchedData } = require("express-validator");
 
-const Medidas = require("../models/medidas");
+const { Medida, Producto } = require("../models");
+const { Op } = require("sequelize");
 
 // Ver Medida
-const getMedida = async (req, res = response) => {
+const getMedidaById = async (req, res = response) => {
   try {
     // Obtener datos desde el frontend
     const { id } = req.params;
-    const medida = await Medidas.findByPk(id);
+    const medida = await Medida.findByPk(id);
 
     // Comprobar si existe el id ingresado
     if (!medida) {
       // Mostrar mensaje de error
-      handleErrorResponse(res, "ID Medida no existe", 404);
+      handleErrorResponse(res, "Medida no encontrada", 404);
       return;
     }
+
+    const data = {
+      success: true,
+      data: medida,
+    };
     // Generar respuesta exitosa
-    res.send(medida);
+    res.send(data);
   } catch (error) {
-    handleHttpError(res, "Error al buscar Medida");
+    console.error("Error al obtener medida:", error);
+    handleHttpError(res, "Error al obtener medida");
   }
 };
 // Ver Medidas
 const getMedidas = async (req, res = response) => {
   try {
-    // Obtener datos
-    const medida = await Medidas.findAll();
+    const { estado, search } = req.query;
+    const whereClause = {};
 
+    if (estado) whereClause.estado = estado;
+    if (search) {
+      whereClause[Op.or] = [
+        { nombre: { [Op.like]: `%${search}%` } },
+        { abreviatura: { [Op.like]: `%${search}%` } },
+      ];
+    }
+    // Obtener datos
+    const medidas = await Medida.findAll({
+      where: whereClause,
+      order: [["nombre", "ASC"]],
+    });
+
+    const data = {
+      success: true,
+      data: medidas,
+    };
     // Mostrar datos
-    res.send(medida);
+    res.send(data);
   } catch (error) {
+    console.error("Error al obtener medidas:", error);
     // Mostrar mensaje de error en la peticion
     handleHttpError(res, "Error al obtener medidas");
   }
@@ -45,26 +70,36 @@ const createMedida = async (req, res = response) => {
   try {
     // Limpiar los datos
     const body = matchedData(req);
-    // Verificar la existencia de la categoria
-    const checkIsExist = await Medidas.findOne({
-      where: { medida: body.medida },
+    // Verificar la existencia de la medida
+    const existenteNombre = await Medida.findOne({
+      where: { nombre: body.nombre },
     });
-    if (checkIsExist) {
-      handleErrorResponse(res, "Medida Existente", 401);
+    if (existenteNombre) {
+      handleErrorResponse(res, "Ya existe una medida con ese nombre", 400);
       return;
     }
+
+    const existenteAbrev = await Medida.findOne({
+      where: { abreviatura: body.abreviatura },
+    });
+    if (existenteAbrev) {
+      handleErrorResponse(res, "Ya existe una medida con esa abreviatura", 400);
+      return;
+    }
+
     // Crear nueva medida
-    const medida = await Medidas.create(body);
+    const medida = await Medida.create(body);
     const data = {
-      ok: true,
-      msg: "Medida creada exitosamente",
+      success: true,
+      message: "Medida creada exitosamente",
       medida,
     };
     // Generar respuesta exitosa
     res.send(data);
   } catch (error) {
+    console.error("Error al crear medida:", error);
     // Error al crear categoria
-    handleHttpError(res, "Error al crear Medida");
+    handleHttpError(res, "Error al crear medida");
   }
 };
 
@@ -76,26 +111,56 @@ const updateMedida = async (req, res = response) => {
     const body = matchedData(req);
 
     // Checkear id medida existente
-    const medida = await Medidas.findByPk(id);
+    const medida = await Medida.findByPk(id);
 
     if (!medida) {
-      handleErrorResponse(res, "La medida no existe", 404);
+      handleErrorResponse(res, "Medida no encontrada", 404);
       return;
     }
 
-    await medida.update(body);
+    if (body.nombre && body.nombre !== medida.nombre) {
+      const existente = await Medida.findOne({
+        where: { nombre: body.nombre },
+      });
+      if (existente) {
+        handleErrorResponse(res, "Ya existe una medida con ese nombre", 404);
+        return;
+      }
+    }
+
+    if (body.abreviatura && body.abreviatura !== medida.abreviatura) {
+      const existente = await Medida.findOne({
+        where: { abreviatura: body.abreviatura },
+      });
+      if (existente) {
+        handleErrorResponse(
+          res,
+          "Ya existe una medida con esa abreviatura",
+          404
+        );
+        return;
+      }
+    }
+
+    await medida.update({
+      nombre: nombre || medida.nombre,
+      abreviatura: abreviatura || medida.abreviatura,
+      descripcion: descripcion !== undefined ? descripcion : medida.descripcion,
+      estado: estado || medida.estado,
+    });
 
     // Generar respuesta exitosa
     const data = {
-      ok: true,
-      msg: "Medida editada exitosamente",
-      body,
+      success: true,
+      message: "Medida editada exitosamente",
+      data: body,
     };
 
     res.send(data);
   } catch (error) {
+    console.error("Error al actualizar medida:", error);
     // Error al editar categoria
-    handleHttpError(res, "Error al editar Medida!");
+    handleHttpError(res, "Error al editar medida");
   }
 };
 
@@ -105,28 +170,41 @@ const deleteMedida = async (req, res = response) => {
     // Eliminar usuario seleccionado
     const { id } = req.params;
     // Buscar si existe el registro
-    const medida = await Medidas.findByPk(id);
+    const medida = await Medida.findByPk(id);
     if (!medida) {
-      handleErrorResponse(res, "Medida no existente", 404);
+      handleErrorResponse(res, "Medida no encontrada", 404);
       return;
     }
+
+    const productosAsociados = await Producto.count({
+      where: { medida_id: id },
+    });
+    if (productosAsociados > 0) {
+      handleErrorResponse(
+        res,
+        `No se puede eliminar la medida porque tiene ${productosAsociados} producto(s) asociado(s)`,
+        404
+      );
+      return;
+    }
+
     // Eliminando datos
-    await medida.destroy(medida);
+    await medida.destroy();
 
     // Generar respuesta exitosa
     const data = {
-      ok: true,
-      msg: "Medida eliminada exitosamente",
-      medida,
+      success: true,
+      message: "Medida eliminada exitosamente",
     };
     res.send(data);
   } catch (error) {
+    console.error("Error al eliminar medida:", error);
     handleHttpError(res, "Error al eliminar medida");
   }
 };
 
 module.exports = {
-  getMedida,
+  getMedidaById,
   getMedidas,
   createMedida,
   updateMedida,
