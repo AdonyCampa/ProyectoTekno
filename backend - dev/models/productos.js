@@ -23,7 +23,7 @@ const Producto = sequelize.define(
       allowNull: true,
     },
     imagen: {
-      type: DataTypes.TEXT,
+      type: DataTypes.STRING(255),
       allowNull: true,
     },
     precio_costo: {

@@ -31,25 +31,25 @@ const getRolById = async (req, res = response) => {
     // Comprobar si existe el id ingresado
     if (!rol) {
       // Mostrar mensaje de error
-      handleErrorResponse(res, "ID Rol no existe", 404);
+      handleErrorResponse(res, "Rol no encontrado", 404);
       return;
     }
 
     const data = {
-      succes: true,
+      success: true,
       data: rol,
     };
     // Generar respuesta exitosa
     res.send(data);
   } catch (error) {
     console.error("Error al obtener rol:", error);
-    handleHttpError(res, "Error al buscar rol");
+    handleHttpError(res, "Error al obtener rol");
   }
 };
 // Ver roles
 const getRoles = async (req, res = response) => {
   try {
-    const { estado, incluir_permisos } = req.query;
+    const { estado, incluir_permisos, incluir_usuarios } = req.query;
 
     const whereClause = {};
     if (estado) whereClause.estado = estado;
@@ -69,14 +69,23 @@ const getRoles = async (req, res = response) => {
         ],
       });
     }
+
+    if (incluir_usuarios === "true") {
+      includeOptions.push({
+        model: Usuario,
+        as: "usuarios",
+        attributes: ["id", "usuario"],
+      });
+    }
+
     const roles = await Rol.findAll({
       where: whereClause,
       include: includeOptions,
-      order: [["created_at", "DESC"]],
+      order: [["createdAt", "DESC"]],
     });
 
     const data = {
-      succes: true,
+      success: true,
       data: roles,
     };
     // Mostrar datos
@@ -95,14 +104,14 @@ const createRol = async (req, res = response) => {
     // Verificar la existencia del rol
     const checkIsExist = await Rol.findOne({ where: { nombre: body.nombre } });
     if (checkIsExist) {
-      handleErrorResponse(res, "Rol Existente", 401);
+      handleErrorResponse(res, "El nombre del rol ya existe", 400);
       return;
     }
     // Crear nuevo rol
     const rol = await Rol.create(body);
     const data = {
-      succes: true,
-      messge: "Rol creado exitosamente",
+      success: true,
+      message: "Rol creado exitosamente",
       data: rol,
     };
     // Generar respuesta exitosa
@@ -110,7 +119,7 @@ const createRol = async (req, res = response) => {
   } catch (error) {
     console.error("Error al crear rol:", error);
     // Error al crear el rol
-    handleHttpError(res, "Error al crear Rol!");
+    handleHttpError(res, "Error al crear rol");
   }
 };
 // Editar rol seleccionado
@@ -122,7 +131,7 @@ const updateRol = async (req, res = response) => {
     // Checkear id rol existente
     const rol = await Rol.findByPk(id);
     if (!rol) {
-      handleErrorResponse(res, "El rol no existe", 404);
+      handleErrorResponse(res, "Rol no encontrado", 404);
       return;
     }
     // Verificar nombre único si cambió
@@ -131,10 +140,8 @@ const updateRol = async (req, res = response) => {
         where: { nombre: body.nombre },
       });
       if (nombreExistente) {
-        return res.status(400).json({
-          success: false,
-          message: "El nombre del rol ya existe",
-        });
+        handleErrorResponse(res, "El nombre del rol ya existe", 404);
+        return;
       }
     }
 
@@ -147,9 +154,9 @@ const updateRol = async (req, res = response) => {
     });
     // Generar respuesta exitosa
     const data = {
-      succes: true,
+      success: true,
       message: "Rol actualizado exitosamente",
-      data: body,
+      data: rol,
     };
     res.send(data);
   } catch (error) {
@@ -166,7 +173,7 @@ const deleteRol = async (req, res = response) => {
     // Buscar si existe el registro
     const rol = await Rol.findByPk(id);
     if (!rol) {
-      handleErrorResponse(res, "Rol no existente", 404);
+      handleErrorResponse(res, "Rol no encontrado", 404);
       return;
     }
 
@@ -176,7 +183,7 @@ const deleteRol = async (req, res = response) => {
       handleErrorResponse(
         res,
         `No se puede eliminar el rol porque hay ${usuariosConRol} usuario(s) asignado(s)`,
-        404
+        400
       );
       return;
     }
@@ -188,7 +195,7 @@ const deleteRol = async (req, res = response) => {
     await rol.destroy();
     // Generar respuesta exitosa
     const data = {
-      succes: true,
+      success: true,
       message: "Rol eliminado exitosamente",
       data: rol,
     };
@@ -213,7 +220,7 @@ const asignarPermisos = async (req, res = response) => {
     const rol = await Rol.findByPk(rol_id);
     if (!rol) {
       await transaction.rollback();
-      handleErrorResponse(res, "Rol no existente", 404);
+      handleErrorResponse(res, "Rol no encontrado", 404);
       return;
     }
 
@@ -255,7 +262,7 @@ const asignarPermisos = async (req, res = response) => {
 
     // Generar respuesta exitosa
     const data = {
-      succes: true,
+      success: true,
       message: "Permisos asignados exitosamente",
       data: rolActualizado,
     };
@@ -286,7 +293,7 @@ const getPermisosPorRol = async (req, res = response) => {
 
     // Generar respuesta exitosa
     const data = {
-      succes: true,
+      success: true,
       data: permisos,
     };
 

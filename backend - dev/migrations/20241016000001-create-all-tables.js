@@ -93,7 +93,7 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "RESTRICT",
       },
-      ultimoAtcceso: {
+      ultimo_acceso: {
         type: Sequelize.DATE,
         allowNull: true,
       },
@@ -949,7 +949,7 @@ module.exports = {
     });
 
     // Crear índices para mejorar el rendimiento
-    await queryInterface.addIndex("usuarios", ["email"]);
+    await queryInterface.addIndex("usuarios", ["usuario"]);
     await queryInterface.addIndex("usuarios", ["estado"]);
     await queryInterface.addIndex("usuarios", ["rol_id"]);
     await queryInterface.addIndex("modulos", ["slug"]);
@@ -975,7 +975,7 @@ module.exports = {
     await queryInterface.addIndex("cajas", ["fecha_apertura"]);
     await queryInterface.addIndex("movimientos_caja", ["caja_id"]);
     await queryInterface.addIndex("movimientos_caja", ["tipo"]);
-    await queryInterface.addIndex("movimientos_caja", ["created_at"]);
+    await queryInterface.addIndex("movimientos_caja", ["createdAt"]);
   },
 
   down: async (queryInterface, Sequelize) => {

@@ -1,23 +1,26 @@
 const { response } = require("express");
 const jwt = require("jsonwebtoken");
 
-const {
-  handleHttpError,
-  handleErrorResponse,
-} = require("../helpers/handleError");
+const { handleErrorResponse } = require("../helpers/handleError");
 
 const validarJWT = (req, res = response, next) => {
-  const token = req.header("x-token");
+  const token =
+    req.header("x-token") ||
+    req.header("Authorization")?.replace("Bearer ", "");
 
   if (!token) {
-    handleErrorResponse(res, "Error en el token", 401);
+    handleErrorResponse(res, "No hay token en la petición", 401);
     return;
   }
 
   try {
-    const { id, usuario } = jwt.verify(token, process.env.SECRET_JWT_SEED);
+    const { id, usuario, rol_id } = jwt.verify(
+      token,
+      process.env.SECRET_JWT_SEED
+    );
     req.id = id;
     req.usuario = usuario;
+    req.rol_id = rol_id;
   } catch (error) {
     handleErrorResponse(res, "Token no válido", 401);
     return;

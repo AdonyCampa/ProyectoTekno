@@ -5,7 +5,8 @@ const {
 } = require("../helpers/handleError");
 const { matchedData } = require("express-validator");
 
-const { CajaAperturas, Cajas } = require("../models/caja");
+const { Caja, MovimientoCaja, Usuario } = require("../models");
+const sequelize = require("../config/mysql");
 
 /**
  * Obtener caja actual (abierta)
@@ -43,7 +44,7 @@ const getCajaActual = async (req, res = response) => {
     }
 
     const data = {
-      succes: true,
+      success: true,
       mesage: "Apertura de caja Exitosa",
       data: caja,
     };
@@ -51,7 +52,7 @@ const getCajaActual = async (req, res = response) => {
     res.send(data);
   } catch (error) {
     console.error("Error al obtener caja actual:", error);
-    handleHttpError(res, "Error al caja actual", 500);
+    handleHttpError(res, "Error al obtener caja actual", 500);
   }
 };
 
@@ -61,30 +62,33 @@ const getCajaActual = async (req, res = response) => {
 const abrirCaja = async (req, res = response) => {
   const transaction = await sequelize.transaction();
   try {
-    const { monto_inicial, observaciones } = req.body;
-    const usuario_id = req.usuario.id; // Asume middleware de autenticación
-
     // Limpiar los datos
     const body = matchedData(req);
+    const usuario_id = req.id; // Asume middleware de autenticación
+    console.log(body);
 
     // Verificar si hay una caja abierta
-    const cajaAbierta = await Cajas.findOne({
+    const cajaAbierta = await Caja.findOne({
       where: { estado: "abierta" },
     });
 
     if (cajaAbierta) {
       await transaction.rollback();
-      handleErrorResponse(res, "Ya existe una caja abierta", 400);
+      handleErrorResponse(
+        res,
+        "Ya existe una caja abierta. Debe cerrarla antes de abrir una nueva.",
+        400
+      );
       return;
     }
 
     // Aperturar Caja
-    const nuevaCaja = await Cajas.create(
+    const nuevaCaja = await Caja.create(
       {
         fecha_apertura: new Date(),
-        monto_inicial,
+        monto_inicial: body.monto_inicial,
         usuario_apertura: usuario_id,
-        observaciones_apertura: observaciones,
+        observaciones_apertura: body.observaciones,
         estado: "abierta",
       },
       { transaction }
@@ -93,12 +97,12 @@ const abrirCaja = async (req, res = response) => {
     // Crear movimiento de apertura
     await MovimientoCaja.create(
       {
-        caja: nuevaCaja.id,
+        caja_id: nuevaCaja.id,
         tipo: "apertura",
         concepto: "Apertura de caja",
-        descripcion: observaciones || "Apertura inicial de caja",
-        monto: monto_inicial,
-        usuario_id,
+        descripcion: body.observaciones || "Apertura inicial de caja",
+        monto: body.monto_inicial,
+        usuario_id: usuario_id,
       },
       { transaction }
     );
@@ -111,14 +115,14 @@ const abrirCaja = async (req, res = response) => {
         {
           model: Usuario,
           as: "usuarioApertura",
-          attributes: ["id", "nombre", "email"],
+          attributes: ["id", "nombres", "apellidos", "usuario"],
         },
       ],
     });
 
     const data = {
-      succes: true,
-      message: "Apertura de caja Exitosa",
+      success: true,
+      message: "Caja abierta exitosamente",
       data: cajaCreada,
     };
     // Generar respuesta exitosa
@@ -137,15 +141,11 @@ const abrirCaja = async (req, res = response) => {
 const cerrarCaja = async (req, res = response) => {
   const transaction = await sequelize.transaction();
   try {
-    const { caja_id, monto_final, observaciones } = req.body;
-    const usuario_id = req.usuario.id;
-
-    // Limpiar los datos
-    const { id } = req.params;
     const body = matchedData(req);
+    const usuario_id = req.id;
 
     // Buscar caja
-    const caja = await Caja.findByPk(caja_id);
+    const caja = await Caja.findByPk(body.caja_id);
 
     if (!caja) {
       await transaction.rollback();
@@ -159,7 +159,7 @@ const cerrarCaja = async (req, res = response) => {
 
     // Calcular totales
     const movimientos = await MovimientoCaja.findAll({
-      where: { caja_id },
+      where: { caja_id: body.caja_id },
     });
 
     const total_ingresos = movimientos
@@ -172,20 +172,20 @@ const cerrarCaja = async (req, res = response) => {
 
     const saldo_esperado =
       parseFloat(caja.monto_inicial) + total_ingresos - total_egresos;
-    const diferencia = parseFloat(monto_final) - saldo_esperado;
+    const diferencia = parseFloat(body.monto_final) - saldo_esperado;
 
     // Actualizar caja
     await caja.update(
       {
         fecha_cierre: new Date(),
-        monto_final,
+        monto_final: body.monto_final,
         total_ingresos,
         total_egresos,
         saldo_esperado,
         diferencia,
         estado: "cerrada",
         usuario_cierre: usuario_id,
-        observaciones_cierre: observaciones,
+        observaciones_cierre: body.observaciones,
       },
       { transaction }
     );
@@ -193,13 +193,13 @@ const cerrarCaja = async (req, res = response) => {
     // Crear movimiento de cierre
     await MovimientoCaja.create(
       {
-        caja_id,
+        caja_id: body.caja_id,
         tipo: "cierre",
         concepto: "Cierre de caja",
         descripcion:
-          observaciones ||
+          body.observaciones ||
           `Cierre de caja - Diferencia: Q ${diferencia.toFixed(2)}`,
-        monto: monto_final,
+        monto: body.monto_final,
         usuario_id,
       },
       { transaction }
@@ -208,24 +208,24 @@ const cerrarCaja = async (req, res = response) => {
     await transaction.commit();
 
     // Obtener caja actualizada
-    const cajaCerrada = await Caja.findByPk(caja_id, {
+    const cajaCerrada = await Caja.findByPk(body.caja_id, {
       include: [
         {
           model: Usuario,
           as: "usuarioApertura",
-          attributes: ["id", "nombre"],
+          attributes: ["id", "usuario"],
         },
         {
           model: Usuario,
           as: "usuarioCierre",
-          attributes: ["id", "nombre"],
+          attributes: ["id", "usuario"],
         },
       ],
     });
 
     // Generar respuesta exitosa
     const data = {
-      succes: true,
+      success: true,
       message: "Cierre de caja Exitoso",
       data: cajaCerrada,
     };
@@ -234,7 +234,6 @@ const cerrarCaja = async (req, res = response) => {
   } catch (error) {
     await transaction.rollback();
     console.error("Error al cerrar caja:", error);
-    // Error al editar categoria
     handleHttpError(res, "Error al cerrar caja");
   }
 };
@@ -247,7 +246,7 @@ const crearMovimiento = async (req, res) => {
   const transaction = await sequelize.transaction();
 
   try {
-    const { tipo, concepto, descripcion, monto, referencia } = req.body;
+    const body = matchedData(req);
     const usuario_id = req.usuario.id;
 
     // Verificar que hay una caja abierta
@@ -257,35 +256,37 @@ const crearMovimiento = async (req, res) => {
 
     if (!cajaAbierta) {
       await transaction.rollback();
-      return res.status(400).json({
-        success: false,
-        message: "No hay caja abierta. Debe abrir una caja primero.",
-      });
+      handleErrorResponse(
+        res,
+        "No hay caja abierta. Debe abrir una caja primero.",
+        400
+      );
+      return;
     }
 
     // Crear movimiento
     const movimiento = await MovimientoCaja.create(
       {
         caja_id: cajaAbierta.id,
-        tipo,
-        concepto,
-        descripcion,
-        monto,
-        referencia,
+        tipo: body.tipo,
+        concepto: body.concepto,
+        descripcion: body.descripcion,
+        monto: body.monto,
+        referencia: body.referencia,
         usuario_id,
       },
       { transaction }
     );
 
     // Actualizar totales de la caja
-    if (tipo === "ingreso") {
+    if (body.tipo === "ingreso") {
       await cajaAbierta.increment("total_ingresos", {
-        by: parseFloat(monto),
+        by: parseFloat(body.monto),
         transaction,
       });
-    } else if (tipo === "egreso") {
+    } else if (body.tipo === "egreso") {
       await cajaAbierta.increment("total_egresos", {
-        by: parseFloat(monto),
+        by: parseFloat(body.monto),
         transaction,
       });
     }
@@ -303,19 +304,16 @@ const crearMovimiento = async (req, res) => {
       ],
     });
 
-    res.status(201).json({
+    const data = {
       success: true,
       message: "Movimiento registrado exitosamente",
       data: movimientoCreado,
-    });
+    };
+    res.send(data);
   } catch (error) {
     await transaction.rollback();
     console.error("Error al crear movimiento:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error al registrar el movimiento",
-      error: error.message,
-    });
+    handleHttpError(res, "Error al registrar el movimiento");
   }
 };
 
@@ -339,7 +337,7 @@ const getMovimientos = async (req, res) => {
     if (tipo) whereClause.tipo = tipo;
 
     if (fecha_inicio && fecha_fin) {
-      whereClause.created_at = {
+      whereClause.createdAt = {
         [Op.between]: [new Date(fecha_inicio), new Date(fecha_fin)],
       };
     }
@@ -352,15 +350,15 @@ const getMovimientos = async (req, res) => {
         {
           model: Usuario,
           as: "usuario",
-          attributes: ["id", "nombre"],
+          attributes: ["id", "usuario"],
         },
       ],
-      order: [["created_at", "DESC"]],
+      order: [["createdAt", "DESC"]],
       limit: parseInt(limit),
       offset,
     });
 
-    res.status(200).json({
+    const data = {
       success: true,
       data: {
         movimientos: rows,
@@ -371,14 +369,11 @@ const getMovimientos = async (req, res) => {
           totalPages: Math.ceil(count / parseInt(limit)),
         },
       },
-    });
+    };
+    res.send(data);
   } catch (error) {
     console.error("Error al obtener movimientos:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error al obtener los movimientos",
-      error: error.message,
-    });
+    handleHttpError(res, "Error al obtener los movimientos");
   }
 };
 
@@ -407,12 +402,12 @@ const getHistorialCajas = async (req, res) => {
         {
           model: Usuario,
           as: "usuarioApertura",
-          attributes: ["id", "nombre"],
+          attributes: ["id", "usuario"],
         },
         {
           model: Usuario,
           as: "usuarioCierre",
-          attributes: ["id", "nombre"],
+          attributes: ["id", "usuario"],
         },
       ],
       order: [["fecha_apertura", "DESC"]],
@@ -434,11 +429,7 @@ const getHistorialCajas = async (req, res) => {
     });
   } catch (error) {
     console.error("Error al obtener historial:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error al obtener el historial de cajas",
-      error: error.message,
-    });
+    handleHttpError(res, "Error al obtener historial");
   }
 };
 
@@ -472,17 +463,14 @@ const getEstadisticas = async (req, res) => {
       raw: true,
     });
 
-    res.status(200).json({
+    const data = {
       success: true,
       data: cajas[0],
-    });
+    };
+    res.send(data);
   } catch (error) {
     console.error("Error al obtener estadísticas:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error al obtener las estadísticas",
-      error: error.message,
-    });
+    handleHttpError(res, "Error al obtener estadisticas");
   }
 };
 

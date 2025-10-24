@@ -1,5 +1,9 @@
 const { response } = require("express");
 const { Permiso, Modulo } = require("../models");
+const {
+  handleHttpError,
+  handleErrorResponse,
+} = require("../helpers/handleError");
 
 /**
  * Middleware para validar permisos del usuario
@@ -10,14 +14,10 @@ const validarPermisos = (moduloSlug, accion) => {
   return async (req, res = response, next) => {
     try {
       // Verificar que el usuario esté autenticado
-      if (!req.usuario || !req.usuario.rol_id) {
-        return res.status(401).json({
-          success: false,
-          message: "No autenticado",
-        });
+      if (!req.usuario || !req.rol_id) {
+        handleErrorResponse(res, "No autenticado", 404);
+        return;
       }
-
-      const { rol_id } = req.usuario;
 
       // Buscar el módulo por slug
       const modulo = await Modulo.findOne({
@@ -25,49 +25,42 @@ const validarPermisos = (moduloSlug, accion) => {
       });
 
       if (!modulo) {
-        return res.status(404).json({
-          success: false,
-          message: "Módulo no encontrado",
-        });
+        handleErrorResponse(res, "Módulo no encontrado", 404);
+        return;
       }
 
       // Buscar permisos del rol para ese módulo
       const permiso = await Permiso.findOne({
-        where: {
-          rol_id,
-          modulo_id: modulo.id,
-        },
+        where: { rol_id: req.rol_id, modulo_id: modulo.id },
       });
 
       // Si no hay permisos definidos para este módulo, denegar acceso
       if (!permiso) {
-        return res.status(403).json({
-          success: false,
-          message: "No tienes permisos para acceder a este módulo",
-        });
+        handleErrorResponse(
+          res,
+          "No tienes permisos para acceder a este módulo",
+          404
+        );
+        return;
       }
 
       // Verificar la acción específica
       const tienePermiso = permiso[accion];
 
       if (!tienePermiso) {
-        return res.status(403).json({
-          success: false,
-          message: `No tienes permiso para ${getAccionTexto(
-            accion
-          )} en este módulo`,
-        });
+        handleErrorResponse(
+          res,
+          `No tienes permiso para ${getAccionTexto(accion)} en este módulo`,
+          404
+        );
+        return;
       }
 
       // Si tiene permiso, continuar
       next();
     } catch (error) {
       console.error("Error al validar permisos:", error);
-      return res.status(500).json({
-        success: false,
-        message: "Error al validar permisos",
-        error: error.message,
-      });
+      handleHttpError(res, "Error al validar permisos");
     }
   };
 };
@@ -91,31 +84,26 @@ const getAccionTexto = (accion) => {
 const esAdministrador = async (req, res = response, next) => {
   try {
     if (!req.usuario || !req.usuario.rol_id) {
-      return res.status(401).json({
-        success: false,
-        message: "No autenticado",
-      });
+      handleErrorResponse(res, "No autenticado", 404);
+      return;
     }
 
     const { Rol } = require("../models");
     const rol = await Rol.findByPk(req.usuario.rol_id);
 
     if (!rol || rol.nombre.toLowerCase() !== "administrador") {
-      return res.status(403).json({
-        success: false,
-        message:
-          "Acceso denegado. Solo administradores pueden realizar esta acción",
-      });
+      handleErrorResponse(
+        res,
+        "Acceso denegado. Solo administradores pueden realizar esta acción",
+        404
+      );
+      return;
     }
 
     next();
   } catch (error) {
     console.error("Error al verificar rol de administrador:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Error al verificar permisos",
-      error: error.message,
-    });
+    handleHttpError(res, "Error al verificar rol de administrador");
   }
 };
 
@@ -124,15 +112,13 @@ const esAdministrador = async (req, res = response, next) => {
  */
 const obtenerPermisosUsuario = async (req, res = response) => {
   try {
-    if (!req.usuario || !req.usuario.rol_id) {
-      return res.status(401).json({
-        success: false,
-        message: "No autenticado",
-      });
+    if (!req.usuario || !req.rol_id) {
+      handleErrorResponse(res, "No autenticado", 401);
+      return;
     }
 
     const permisos = await Permiso.findAll({
-      where: { rol_id: req.usuario.rol_id },
+      where: { rol_id: req.rol_id },
       include: [
         {
           model: Modulo,
@@ -152,17 +138,14 @@ const obtenerPermisosUsuario = async (req, res = response) => {
       order: [[{ model: Modulo, as: "modulo" }, "orden", "ASC"]],
     });
 
-    res.status(200).json({
+    const data = {
       success: true,
       data: permisos,
-    });
+    };
+    res.send(data);
   } catch (error) {
     console.error("Error al obtener permisos del usuario:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Error al obtener permisos",
-      error: error.message,
-    });
+    handleHttpError(res, "Error al obtener permisos del usuario");
   }
 };
 

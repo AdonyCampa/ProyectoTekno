@@ -11,10 +11,16 @@ const {
   updateProducto,
   getProductosBajoStock,
   getProductoById,
+  eliminarImagenProducto,
+  subirImagenProducto,
 } = require("../controllers/productos");
 
 const { validarJWT } = require("../middlewares/validar-jwt");
 const { validarPermisos } = require("../middlewares/validar-permisos");
+const {
+  uploadProductoImage,
+  handleMulterError,
+} = require("../middlewares/upload");
 
 const router = Router();
 
@@ -50,5 +56,29 @@ router.put(
 
 // Eliminar Producto seleccionado
 router.delete("/:id", validarPermisos("productos", "eliminar"), deleteProducto);
+
+/**
+ * @route POST /api/productos/:id/imagen
+ * @desc Subir imagen de producto
+ * @access Private
+ */
+router.post(
+  "/:id/imagen",
+  validarPermisos("productos", "actualizar"),
+  uploadProductoImage,
+  handleMulterError,
+  subirImagenProducto
+);
+
+/**
+ * @route DELETE /api/productos/:id/imagen
+ * @desc Eliminar imagen de producto
+ * @access Private
+ */
+router.delete(
+  "/:id/imagen",
+  validarPermisos("productos", "actualizar"),
+  eliminarImagenProducto
+);
 
 module.exports = router;

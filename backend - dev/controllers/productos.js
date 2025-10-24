@@ -101,14 +101,12 @@ const getProductos = async (req, res = response) => {
 
     const data = {
       success: true,
-      data: {
-        productos: rows,
-        pagination: {
-          total: count,
-          page: parseInt(page),
-          limit: parseInt(limit),
-          totalPages: Math.ceil(count / parseInt(limit)),
-        },
+      data: rows,
+      pagination: {
+        total: count,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(count / parseInt(limit)),
       },
     };
 
@@ -381,11 +379,117 @@ const getProductosBajoStock = async (req, res) => {
   } catch (error) {
     console.error("Error al obtener productos con bajo stock:", error);
     handleHttpError(res, "Error al obtener productos con bajo stock");
-    res.status(500).json({
-      success: false,
-      message: "Error al obtener productos con bajo stock",
-      error: error.message,
+  }
+};
+
+/**
+ * Subir imagen de producto
+ */
+const subirImagenProducto = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const producto = await Producto.findByPk(id);
+    if (!producto) {
+      // Eliminar archivo subido si el producto no existe
+      if (req.file) {
+        const fs = require("fs").promises;
+        await fs.unlink(req.file.path);
+      }
+      handleErrorResponse(res, "Producto no encontrado", 404);
+      return;
+    }
+
+    // Verificar que se subió un archivo
+    if (!req.file) {
+      handleErrorResponse(res, "No se ha proporcionado ninguna imagen", 400);
+      return;
+    }
+
+    // Procesar y mover la imagen
+    const { procesarImagen } = require("../helpers/imageHelper");
+    const rutaImagen = await procesarImagen(
+      req.file,
+      "producto",
+      producto.imagen
+    );
+
+    // Actualizar producto con la nueva ruta de imagen
+    await producto.update({ imagen: rutaImagen });
+
+    // Obtener producto actualizado con relaciones
+    const productoActualizado = await Producto.findByPk(id, {
+      include: [
+        { model: Categoria, as: "categoria", attributes: ["id", "nombre"] },
+        { model: Marca, as: "marca", attributes: ["id", "nombre"] },
+        {
+          model: Medida,
+          as: "medida",
+          attributes: ["id", "nombre", "abreviatura"],
+        },
+      ],
     });
+
+    const data = {
+      success: true,
+      message: "Imagen subida exitosamente",
+      data: productoActualizado,
+    };
+    res.send(data);
+  } catch (error) {
+    console.error("Error al subir imagen de producto:", error);
+
+    // Limpiar archivo temporal en caso de error
+    if (req.file) {
+      try {
+        const fs = require("fs").promises;
+        await fs.unlink(req.file.path);
+      } catch (unlinkError) {
+        console.error("Error al eliminar archivo temporal:", unlinkError);
+      }
+    }
+    handleHttpError(res, "Error al subir la imagen");
+  }
+};
+
+/**
+ * Eliminar imagen de producto
+ */
+const eliminarImagenProducto = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const producto = await Producto.findByPk(id);
+    if (!producto) {
+      handleErrorResponse(res, "Producto no encontrado", 400);
+      return;
+    }
+
+    if (!producto.imagen) {
+      handleErrorResponse(
+        res,
+        "El producto no tiene imagen para eliminar",
+        400
+      );
+      return;
+    }
+
+    // Eliminar imagen del servidor
+    const { eliminarImagen } = require("../helpers/imageHelper");
+    await eliminarImagen(producto.imagen);
+
+    // Actualizar producto
+    await producto.update({ imagen: null });
+
+    const data = {
+      success: true,
+      message: "Imagen eliminada exitosamente",
+    };
+
+    res.send(data);
+  } catch (error) {
+    console.error("Error al eliminar imagen de producto:", error);
+    handleHttpError(res, "Error al eliminar imagen de producto");
   }
 };
 
@@ -396,4 +500,6 @@ module.exports = {
   updateProducto,
   deleteProducto,
   getProductosBajoStock,
+  subirImagenProducto,
+  eliminarImagenProducto,
 };

@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { dbConnect } = require("./config/mysql");
+const path = require("path");
 require("dotenv").config();
 
 // Crear el servidor/aplicación de express
@@ -8,6 +8,9 @@ const app = express();
 
 // Directorio Público
 app.use(express.static("public"));
+
+// IMPORTANTE: Servir archivos estáticos desde la carpeta public
+app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
 
 // CORS
 app.use(cors());
@@ -63,12 +66,12 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`
   ╔═══════════════════════════════════════╗
-  ║   🚀 Servidor iniciado exitosamente  ║
+  ║   🚀 Servidor iniciado exitosamente   ║
   ╠═══════════════════════════════════════╣
   ║   Puerto: ${PORT}                        ║
-  ║   Entorno: ${process.env.NODE_ENV || "development"}            ║
+  ║   Entorno: ${process.env.NODE_ENV || "development"}                ║
   ║   API: http://localhost:${PORT}/api      ║
-  ╚═══════════════════════════════════════╝}`);
+  ╚═══════════════════════════════════════╝`);
 });
 
 // Manejo de señales de terminación

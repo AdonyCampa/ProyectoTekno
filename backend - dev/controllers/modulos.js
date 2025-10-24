@@ -1,5 +1,5 @@
 const { response } = require("express");
-const { Modulo } = require("../models");
+const { Modulo, Permiso } = require("../models");
 
 const {
   handleHttpError,
@@ -53,7 +53,7 @@ const getModuloById = async (req, res = response) => {
     }
 
     const data = {
-      succes: true,
+      success: true,
       data: modulo,
     };
 
@@ -72,6 +72,15 @@ const createModulo = async (req, res = response) => {
     // Limpiar los datos
     const body = matchedData(req);
 
+    // Verificar la existencia del rol
+    const checkIsExist = await Modulo.findOne({
+      where: { nombre: body.nombre },
+    });
+    if (checkIsExist) {
+      handleErrorResponse(res, "El nombre del modulo ya existe", 400);
+      return;
+    }
+
     // Verificar si el slug ya existe
     const slugExistente = await Modulo.findOne({ where: { slug: body.slug } });
     if (slugExistente) {
@@ -79,7 +88,15 @@ const createModulo = async (req, res = response) => {
       return;
     }
 
-    const modulo = await Modulo.create(body);
+    const modulo = await Modulo.create({
+      nombre: body.nombre,
+      slug: body.slug,
+      descripcion: body.descripcion,
+      icono: body.icono,
+      ruta: body.ruta,
+      estado: body.estado,
+      orden: body.orden || 0,
+    });
 
     const data = {
       success: true,
@@ -108,6 +125,17 @@ const updateModulo = async (req, res = response) => {
       return;
     }
 
+    // Verificar nombre único si cambió
+    if (body.nombre && body.nombre !== modulo.nombre) {
+      const slugExistente = await Modulo.findOne({
+        where: { nombre: body.nombre },
+      });
+      if (slugExistente) {
+        handleErrorResponse(res, "El nombre del módulo ya existe", 404);
+        return;
+      }
+    }
+
     // Verificar slug único si cambió
     if (body.slug && body.slug !== modulo.slug) {
       const slugExistente = await Modulo.findOne({
@@ -120,13 +148,14 @@ const updateModulo = async (req, res = response) => {
     }
 
     await modulo.update({
-      nombre: nombre || modulo.nombre,
-      slug: slug || modulo.slug,
-      descripcion: descripcion !== undefined ? descripcion : modulo.descripcion,
-      icono: icono !== undefined ? icono : modulo.icono,
-      ruta: ruta !== undefined ? ruta : modulo.ruta,
-      orden: orden !== undefined ? orden : modulo.orden,
-      estado: estado || modulo.estado,
+      nombre: body.nombre || modulo.nombre,
+      slug: body.slug || modulo.slug,
+      descripcion:
+        body.descripcion !== undefined ? body.descripcion : modulo.descripcion,
+      icono: body.icono !== undefined ? body.icono : modulo.icono,
+      ruta: body.ruta !== undefined ? body.ruta : modulo.ruta,
+      orden: body.orden !== undefined ? body.orden : modulo.orden,
+      estado: body.estado || modulo.estado,
     });
 
     const data = {
@@ -160,7 +189,7 @@ const deleteModulo = async (req, res = response) => {
       handleErrorResponse(
         res,
         "No se puede eliminar el módulo porque tiene permisos asociados",
-        404
+        400
       );
       return;
     }

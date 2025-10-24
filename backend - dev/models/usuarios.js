@@ -43,7 +43,7 @@ const Usuario = sequelize.define(
       allowNull: true,
     },
     imagen: {
-      type: DataTypes.TEXT,
+      type: DataTypes.STRING(255),
       allowNull: true,
     },
     estado: {

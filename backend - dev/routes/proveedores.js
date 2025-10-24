@@ -35,7 +35,7 @@ router.post(
 
 // Editar Proveedoregoria seleccionada
 router.put(
-  "/editar/:id",
+  "/:id",
   validarPermisos("proveedores", "actualizar"),
   validarProveedorUpdate,
   updateProveedor

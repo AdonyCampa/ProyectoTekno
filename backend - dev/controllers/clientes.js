@@ -69,14 +69,13 @@ const getClientes = async (req, res = response) => {
 
     const data = {
       success: true,
-      data: {
-        clientes: rows,
-        pagination: {
-          total: count,
-          page: parseInt(page),
-          limit: parseInt(limit),
-          totalPages: Math.ceil(count / parseInt(limit)),
-        },
+      data: rows,
+
+      pagination: {
+        total: count,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(count / parseInt(limit)),
       },
     };
 

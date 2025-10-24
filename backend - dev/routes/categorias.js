@@ -34,7 +34,7 @@ router.post(
 
 // Editar categoria seleccionada
 router.put(
-  "/editar/:id",
+  "/:id",
   validarPermisos("categorias", "actualizar"),
   validarCategoriaUpdate,
   updateCategoria
@@ -42,7 +42,7 @@ router.put(
 
 // Eliminar categoria seleccionada
 router.delete(
-  "/eliminar/:id",
+  "/:id",
   validarPermisos("categorias", "eliminar"),
   deleteCategoria
 );

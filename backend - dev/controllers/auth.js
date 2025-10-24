@@ -1,21 +1,21 @@
 const { response } = require("express");
 const { Usuario, Rol, Permiso, Modulo } = require("../models");
-const { compare } = require("../helpers/handleJwt");
 const { generarJWT } = require("../helpers/jwt");
 const {
   handleHttpError,
   handleErrorResponse,
 } = require("../helpers/handleError");
+const { matchedData } = require("express-validator");
 
 /**
  * Login de usuario
  */
 const loginUsuario = async (req, res = response) => {
-  const { usuario, password } = req.body;
+  const body = matchedData(req);
   try {
     // Buscar usuario con rol y permisos
     const usuario = await Usuario.findOne({
-      where: { email },
+      where: { usuario: body.usuario },
       include: [
         {
           model: Rol,
@@ -40,7 +40,7 @@ const loginUsuario = async (req, res = response) => {
       return;
     }
     // Verificar contraseña
-    const validPassword = await usuario.compararPassword(password);
+    const validPassword = await usuario.compararPassword(body.password);
     if (!validPassword) {
       handleErrorResponse(res, "Contraseña incorrecta", 401);
       return;
@@ -58,33 +58,56 @@ const loginUsuario = async (req, res = response) => {
     const token = await generarJWT(usuario.id, usuario.usuario, usuario.rol_id);
     // Respuesta del servicio
     const data = {
-      succes: true,
+      success: true,
       message: "Login exitoso",
       data: {
-        token: token,
         usuario: usuario,
+        token: token,
       },
     };
     res.send(data);
   } catch (error) {
     console.error("Error en login:", error);
-    handleHttpError(res, error);
+    handleHttpError(res, "Error en login");
   }
 };
 
 const revalidarToken = async (req, res = response) => {
   const { id, usuario, rol_id } = req;
   // Buscar usuario en la base de datos
-  const dbUser = await Usuario.findByPk(id);
+  //const dbUser = await Usuario.findByPk(id);
+
   // Generar el JWT
   const token = await generarJWT(id, usuario, rol_id);
+
+  const usuarioDB = await Usuario.findOne({
+    where: { usuario: usuario },
+    include: [
+      {
+        model: Rol,
+        as: "rol",
+        include: [
+          {
+            model: Permiso,
+            as: "permisos",
+            include: [
+              {
+                model: Modulo,
+                as: "modulo",
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
   // Respuesta del servidor
   const data = {
-    succes: true,
+    success: true,
     message: "Renovacion de token exitoso",
     data: {
       token: token,
-      usuario: dbUser,
+      usuario: usuarioDB,
     },
   };
   res.send(data);

@@ -42,11 +42,19 @@ const Cliente = sequelize.define(
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
       defaultValue: 0.0,
+      get() {
+        const value = this.getDataValue("limite_credito");
+        return value === null ? 0 : parseFloat(value);
+      },
     },
     saldo_actual: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
       defaultValue: 0.0,
+      get() {
+        const value = this.getDataValue("saldo_actual");
+        return value === null ? 0 : parseFloat(value);
+      },
     },
     estado: {
       type: DataTypes.ENUM("activo", "inactivo"),

@@ -143,10 +143,11 @@ const updateMedida = async (req, res = response) => {
     }
 
     await medida.update({
-      nombre: nombre || medida.nombre,
-      abreviatura: abreviatura || medida.abreviatura,
-      descripcion: descripcion !== undefined ? descripcion : medida.descripcion,
-      estado: estado || medida.estado,
+      nombre: body.nombre || medida.nombre,
+      abreviatura: body.abreviatura || medida.abreviatura,
+      descripcion:
+        body.descripcion !== undefined ? body.descripcion : medida.descripcion,
+      estado: body.estado || medida.estado,
     });
 
     // Generar respuesta exitosa

@@ -65,7 +65,7 @@ const createMarca = async (req, res = response) => {
     // Limpiar los datos
     const body = matchedData(req);
     // Verificar la existencia de la categoria
-    const existente = await Marca.findOne({ where: { marca: body.marca } });
+    const existente = await Marca.findOne({ where: { nombre: body.nombre } });
     if (existente) {
       handleErrorResponse(res, "Ya existe una marca con ese nombre", 400);
       return;

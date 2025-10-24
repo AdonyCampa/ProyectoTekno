@@ -9,7 +9,7 @@ const { matchedData } = require("express-validator");
 const { Op } = require("sequelize");
 
 // Ver usuario
-const getUsuarioByID = async (req, res = response) => {
+const getUsuarioById = async (req, res = response) => {
   try {
     // Ver usuario seleccionado
     const { id } = req.params;
@@ -36,12 +36,12 @@ const getUsuarioByID = async (req, res = response) => {
     // Comprobar si existe el id ingresado
     if (!usuario) {
       // Mostrar mensaje de error
-      handleErrorResponse(res, "ID Usuario no existe", 404);
+      handleErrorResponse(res, "Usuario no encontrado", 404);
       return;
     }
 
     const data = {
-      succes: true,
+      success: true,
       data: usuario,
     };
     // Generar respuesta exitosa
@@ -63,8 +63,9 @@ const getUsuarios = async (req, res = response) => {
 
     if (search) {
       whereClause[Op.or] = [
-        { nombre: { [Op.like]: `%${search}%` } },
-        { email: { [Op.like]: `%${search}%` } },
+        { nombres: { [Op.like]: `%${search}%` } },
+        { apellidos: { [Op.like]: `%${search}%` } },
+        { usuario: { [Op.like]: `%${search}%` } },
       ];
     }
 
@@ -80,21 +81,19 @@ const getUsuarios = async (req, res = response) => {
           attributes: ["id", "nombre"],
         },
       ],
-      order: [["created_at", "DESC"]],
+      order: [["createdAt", "DESC"]],
       limit: parseInt(limit),
       offset,
     });
 
     const data = {
-      succes: true,
-      data: {
-        usuarios: rows,
-        pagination: {
-          total: count,
-          page: parseInt(page),
-          limit: parseInt(limit),
-          totalPages: Math.ceil(count / parseInt(limit)),
-        },
+      success: true,
+      data: rows,
+      pagination: {
+        total: count,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(count / parseInt(limit)),
       },
     };
 
@@ -117,7 +116,7 @@ const createUsuario = async (req, res = response) => {
       where: { usuario: body.usuario },
     });
     if (checkIsExist) {
-      handleErrorResponse(res, "Usuario existente", 400);
+      handleErrorResponse(res, "El usuario ya está registrado", 400);
       return;
     }
 
@@ -148,14 +147,15 @@ const createUsuario = async (req, res = response) => {
     });
 
     const data = {
-      succes: true,
+      success: true,
       message: "Usuario creado exitosamente",
       data: usuarioCreado,
     };
     // Generar respuesta exitosa
     res.send(data);
   } catch (error) {
-    handleHttpError(res, "Error al crear Usuario");
+    console.error("Error al crear usuario:", error);
+    handleHttpError(res, "Error al crear usuario");
   }
 };
 // Editar usuario seleccionado
@@ -163,12 +163,12 @@ const updateUsuario = async (req, res = response) => {
   try {
     // Editar usuario seleccionado
     const { id } = req.params;
-    const { body } = req;
+    const body = matchedData(req);
 
     const usuario = await Usuario.findByPk(id);
     // Checkear si el usuario existe
     if (!usuario) {
-      handleErrorResponse(res, "El usuario no existe ", 404);
+      handleErrorResponse(res, "Usuario no encontrado", 404);
       return;
     }
 
@@ -178,7 +178,7 @@ const updateUsuario = async (req, res = response) => {
         where: { usuario: body.usuario },
       });
       if (userExistente) {
-        handleErrorResponse(res, "El usuario ya existe", 401);
+        handleErrorResponse(res, "El usuario ya esta registrado", 401);
         return;
       }
     }
@@ -195,8 +195,8 @@ const updateUsuario = async (req, res = response) => {
     // Actualizar usuario
     const datosActualizar = {
       usuario: body.usuario || usuario.usuario,
-      nombres: body.nombre || usuario.nombre,
-      apellidos: body.nombre || usuario.nombre,
+      nombres: body.nombres || usuario.nombres,
+      apellidos: body.apellidos || usuario.apellidos,
       email: body.email || usuario.email,
       telefono: body.telefono !== undefined ? telefono : usuario.telefono,
       direccion: body.direccion !== undefined ? direccion : usuario.direccion,
@@ -205,8 +205,8 @@ const updateUsuario = async (req, res = response) => {
     };
 
     // Solo actualizar password si se proporciona
-    if (password) {
-      datosActualizar.password = password;
+    if (body.password) {
+      datosActualizar.password = body.password;
     }
 
     await usuario.update(datosActualizar);
@@ -224,14 +224,14 @@ const updateUsuario = async (req, res = response) => {
 
     // Generar respuesta exitosa
     const data = {
-      succes: true,
-      message: "Usuario actualizar exitosamente",
+      success: true,
+      message: "Usuario actualizado exitosamente",
       data: usuarioActualizado,
     };
     res.send(data);
   } catch (error) {
-    console.error("Error al actualizar usuario:", error);
-    handleHttpError(res, "Error al actualizar usuario");
+    console.error("Error al actualizado usuario:", error);
+    handleHttpError(res, "Error al actualizado usuario");
   }
 };
 // Editar contraseña de usuario
@@ -243,7 +243,7 @@ const updatePasswordUsuario = async (req, res = response) => {
     const usuario = await Usuario.findByPk(id);
     // Checkear si el usuario existe
     if (!usuario) {
-      handleErrorResponse(res, "El usuario no existe", 404);
+      handleErrorResponse(res, "Usuario no encontrado", 404);
       return;
     }
     // Verificar que las contraseñas coincidan
@@ -263,7 +263,7 @@ const updatePasswordUsuario = async (req, res = response) => {
     await usuario.update({ password });
     //Generar respuesta exitosa
     const data = {
-      succes: true,
+      success: true,
       message: "Cambio de contraseña exitoso",
     };
     res.send(data);
@@ -277,12 +277,10 @@ const deleteUsuario = async (req, res = response) => {
   try {
     // Eliminar usuario seleccionado
     const { id } = req.params;
-    const { body } = req;
-    console.log(req);
     // Buscar si existe el registro
     const usuario = await Usuario.findByPk(id);
     if (!usuario) {
-      handleErrorResponse(res, "El usuario no existe", 404);
+      handleErrorResponse(res, "Usuario no encontrado", 404);
       return;
     }
     // Comprobar que el usuario este inactivo
@@ -290,8 +288,13 @@ const deleteUsuario = async (req, res = response) => {
       handleErrorResponse(res, "Estado de usuario activo", 404);
       return;
     }
+    // No permitir eliminar el propio usuario
+    if (parseInt(id) === req.usuario.id) {
+      handleErrorResponse(res, "No puedes eliminar tu propio usuario", 404);
+      return;
+    }
     // Eliminando datos
-    await usuario.destroy(body);
+    await usuario.destroy();
     // Generar respuesta exitosa
     const data = {
       succes: true,
@@ -300,6 +303,7 @@ const deleteUsuario = async (req, res = response) => {
     };
     res.send(data);
   } catch (error) {
+    console.error("Error al eliminar usuario:", error);
     handleHttpError(res, "Error al eliminar usuario");
   }
 };
@@ -313,7 +317,7 @@ const eliminarUsuario = async (req, res) => {
 
     const usuario = await Usuario.findByPk(id);
     if (!usuario) {
-      handleErrorResponse(res, "El usuario no existe", 404);
+      handleErrorResponse(res, "Usuario no encontrado", 404);
       return;
     }
 
@@ -335,20 +339,113 @@ const eliminarUsuario = async (req, res) => {
     res.send(data);
   } catch (error) {
     console.error("Error al eliminar usuario:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error al eliminar usuario",
-      error: error.message,
-    });
+    handleHttpError(res, "Error al eliminar usuario");
+  }
+};
+
+/**
+ * Subir imagen de usuario
+ */
+const subirImagenUsuario = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const usuario = await Usuario.findByPk(id);
+    if (!usuario) {
+      // Eliminar archivo subido si el usuario no existe
+      if (req.file) {
+        await fs.unlink(req.file.path);
+      }
+      handleErrorResponse(res, "Usuario no encontrado", 404);
+      return;
+    }
+
+    // Verificar que se subió un archivo
+    if (!req.file) {
+      handleErrorResponse(res, "No se ha proporcionado ninguna imagen", 404);
+      return;
+    }
+
+    // Procesar y mover la imagen
+    const { procesarImagen } = require("../helpers/imageHelper");
+    const rutaImagen = await procesarImagen(
+      req.file,
+      "usuario",
+      usuario.imagen
+    );
+
+    // Actualizar usuario con la nueva ruta de imagen
+    await usuario.update({ imagen: rutaImagen });
+
+    const data = {
+      success: true,
+      message: "Imagen subida exitosamente",
+      data: {
+        id: usuario.id,
+        nombre: usuario.nombre,
+        imagen: rutaImagen,
+      },
+    };
+    res.send(data);
+  } catch (error) {
+    console.error("Error al subir imagen de usuario:", error);
+
+    // Limpiar archivo temporal en caso de error
+    if (req.file) {
+      try {
+        await fs.unlink(req.file.path);
+      } catch (unlinkError) {
+        console.error("Error al eliminar archivo temporal:", unlinkError);
+      }
+    }
+    handleHttpError(res, "Error al subir la imagen");
+  }
+};
+
+/**
+ * Eliminar imagen de usuario
+ */
+const eliminarImagenUsuario = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const usuario = await Usuario.findByPk(id);
+    if (!usuario) {
+      handleErrorResponse(res, "Usuario no encontrado", 404);
+      return;
+    }
+
+    if (!usuario.imagen) {
+      handleErrorResponse(res, "El usuario no tiene imagen para eliminar", 404);
+      return;
+    }
+
+    // Eliminar imagen del servidor
+    const { eliminarImagen } = require("../helpers/imageHelper");
+    await eliminarImagen(usuario.imagen);
+
+    // Actualizar usuario
+    await usuario.update({ imagen: null });
+
+    const data = {
+      success: true,
+      message: "Imagen eliminada exitosamente",
+    };
+    res.send(data);
+  } catch (error) {
+    console.error("Error al eliminar imagen de usuario:", error);
+    handleHttpError(res, "Error al eliminar la imagen");
   }
 };
 
 module.exports = {
-  getUsuarioByID,
+  getUsuarioById,
   getUsuarios,
   createUsuario,
   updateUsuario,
   updatePasswordUsuario,
   deleteUsuario,
   eliminarUsuario,
+  subirImagenUsuario,
+  eliminarImagenUsuario,
 };

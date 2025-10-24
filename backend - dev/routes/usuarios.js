@@ -6,17 +6,23 @@ const {
   updateUsuario,
   updatePasswordUsuario,
   eliminarUsuario,
-  getUsuarioByID,
+  getUsuarioById,
+  eliminarImagenUsuario,
+  subirImagenUsuario,
 } = require("../controllers/usuarios");
+
 const {
   validarUsuario,
-  validarPasswordUsuario,
   validarUsuarioUpdate,
+  validarPasswordUsuario,
 } = require("../validators/usuarios");
 
 const { validarJWT } = require("../middlewares/validar-jwt");
 const { validarPermisos } = require("../middlewares/validar-permisos");
-
+const {
+  uploadUsuarioImage,
+  handleMulterError,
+} = require("../middlewares/upload");
 const router = Router();
 
 // Aplicar middleware de autenticación a las siguientes rutas
@@ -34,7 +40,7 @@ router.get("/", validarPermisos("usuarios", "leer"), getUsuarios);
  * @desc    Obtener usuario por ID
  * @access  Private (requiere permiso de lectura)
  */
-router.get("/:id", validarPermisos("usuarios", "leer"), getUsuarioByID);
+router.get("/:id", validarPermisos("usuarios", "leer"), getUsuarioById);
 
 /**
  * @route   POST /api/usuarios
@@ -92,6 +98,30 @@ router.put(
   validarPermisos("usuarios", "actualizar"),
   validarPasswordUsuario,
   updatePasswordUsuario
+);
+
+/**
+ * @route POST /api/usuarios/:id/imagen
+ * @desc Subir imagen de usuario
+ * @access Private
+ */
+router.post(
+  "/:id/imagen",
+  validarPermisos("usuarios", "actualizar"),
+  uploadUsuarioImage,
+  handleMulterError,
+  subirImagenUsuario
+);
+
+/**
+ * @route DELETE /api/usuarios/:id/imagen
+ * @desc Eliminar imagen de usuario
+ * @access Private
+ */
+router.delete(
+  "/:id/imagen",
+  validarPermisos("usuarios", "actualizar"),
+  eliminarImagenUsuario
 );
 
 module.exports = router;
